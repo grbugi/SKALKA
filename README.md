@@ -1,7 +1,13 @@
-# <img src="https://github.com/grbugi/SKALKA/blob/6bc4bdb86d0434e16afd3f883a3d6ab621f152c3/skalka_logo_proto.png" width="48"> SKALKA 
-The Scalable Calendar
+<p align="center">
+  <img src="/skalka_logo_proto.png" alt="SKALKA Logo" width="64px">
+</p>
 
------------------------------
+<h1 align="center">SKALKA</h1>
+
+<p align="center">
+  <i>The <b>SCAL</b>able <b>CA</b>lendar</i>
+</p>
+
 ## 🇷🇺 Russian
 SKALKA — это инновационный визуальный календарь с бесконечным 2D-интерфейсом, который превращает планирование времени в навигацию по интерактивной карте.
 Проект решает проблему «лоскутного» отображения дат в классических календарях. Вместо переключения между вкладками «День», «Неделя» или «Месяц», SKALKA объединяет весь временной поток на одной плоскости.
@@ -23,7 +29,8 @@ SKALKA — это инновационный визуальный календа
 - [ ] Реализация поддержки и импорта производственных календарей.
 - [ ] Синхронизация данных: импорт и экспорт по протоколу CalDAV (Google Calendar, Яндекс.Календарь, iCloud и др.).
 - [ ] Разработка мобильных приложений для iOS и Android.
-------------------------------
+
+
 ## 🇬🇧 English
 SKALKA is an innovative visual calendar featuring an infinite 2D canvas that turns time management into seamless map-like navigation.
 The project fixes the fragmented date viewing found in traditional calendars. Instead of switching between "Day", "Week", or "Month" tabs, SKALKA unifies the entire timeline on a single, continuous plane.
