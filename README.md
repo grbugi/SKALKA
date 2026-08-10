@@ -16,7 +16,7 @@ SKALKA — это инновационный визуальный календа
 
 ### 🗺️ Дорожная карта разработки
 - [x] Рабочий PoC (Proof of Concept) основного интерфейса.
-- [ ] 📍 **(Текущий этап)** Доведение интерфейса до ума: обеспечение максимального удобства, интуитивности и плавности зума/навигации.
+- [ ] 📍 Доведение интерфейса до ума: обеспечение максимального удобства, интуитивности и плавности зума/навигации.
 - [ ] Интеграция интерактивных элементов: добавление панелей инструментов, контекстных меню и форм создания событий.
 - [ ] Разработка базового бэкенда и архитектуры базы данных.
 - [ ] Создание базового API (функции создания событий, фильтрация и получение расписаний/графиков на заданный период).
@@ -39,7 +39,7 @@ Built for professionals managing complex, cyclical, or project-based schedules: 
 
 ### 🗺️ Project Roadmap
 - [x] Working PoC (Proof of Concept) of the core map-like interface.
-- [ ] 📍 **(Current Stage)** Polishing the UX: ensuring maximum usability, intuitiveness, and buttery-smooth zoom/navigation.
+- [ ] 📍 Polishing the UX: ensuring maximum usability, intuitiveness, and buttery-smooth zoom/navigation.
 - [ ] Interactive UI elements: adding toolbars, context menus, and event creation forms.
 - [ ] Core backend development and database architecture design.
 - [ ] Basic API implementation (event creation, fetching schedules, and filtering timelines for a specified period).
