@@ -6,15 +6,23 @@ The Scalable Calendar
 SKALKA — это инновационный визуальный календарь с бесконечным 2D-интерфейсом, который превращает планирование времени в навигацию по интерактивной карте.
 Проект решает проблему «лоскутного» отображения дат в классических календарях. Вместо переключения между вкладками «День», «Неделя» или «Месяц», SKALKA объединяет весь временной поток на одной плоскости.
 ### ✨ Ключевые особенности
-
 * Плавный Zoom (Масштабирование): Мгновенный переход от микропланирования (5-минутные интервалы, как на таймлайне видеомонтажа) до макрообзора (весь год на одном экране).
 * Бесконечный 2D-холст: Свободное перемещение по осям X и Y. Дни, недели и месяцы непрерывно перетекают друг в друга без швов и разрывов на стыках лет.
 * Макро-визуализация: В годовом масштабе каждый месяц представлен строкой, перетекающей одна в другую, а столбцы формируют дни недели для идеальной наглядности.
 * Цикличность в 2 клика: Уникальный UX для мгновенного создания сложных повторяющихся событий и графиков.
 
 ### 👥 Для кого этот проект
-
 Инструмент разработан для людей со сложной, цикличной или проектной занятостью: инженеров, администраторов, диспетчеров, проектных менеджеров и сотрудников на вахтовом методе работы.
+
+### 🗺️ Дорожная карта разработки
+- [x] Рабочий PoC (Proof of Concept) основного интерфейса.
+- [ ] 📍 **(Текущий этап)** Доведение интерфейса до ума: обеспечение максимального удобства, интуитивности и плавности зума/навигации.
+- [ ] Интеграция интерактивных элементов: добавление панелей инструментов, контекстных меню и форм создания событий.
+- [ ] Разработка базового бэкенда и архитектуры базы данных.
+- [ ] Создание базового API (функции создания событий, фильтрация и получение расписаний/графиков на заданный период).
+- [ ] Реализация поддержки и импорта производственных календарей.
+- [ ] Синхронизация данных: импорт и экспорт по протоколу CalDAV (Google Calendar, Яндекс.Календарь, iCloud и др.).
+- [ ] Разработка мобильных приложений для iOS и Android.
 ------------------------------
 ## 🇬🇧 English
 SKALKA is an innovative visual calendar featuring an infinite 2D canvas that turns time management into seamless map-like navigation.
@@ -28,4 +36,15 @@ The project fixes the fragmented date viewing found in traditional calendars. In
 
 ### 👥 Target Audience
 Built for professionals managing complex, cyclical, or project-based schedules: engineers, administrators, dispatchers, project managers, and rotational (shift) workers.
+
+### 🗺️ Project Roadmap
+- [x] Working PoC (Proof of Concept) of the core map-like interface.
+- [ ] 📍 **(Current Stage)** Polishing the UX: ensuring maximum usability, intuitiveness, and buttery-smooth zoom/navigation.
+- [ ] Interactive UI elements: adding toolbars, context menus, and event creation forms.
+- [ ] Core backend development and database architecture design.
+- [ ] Basic API implementation (event creation, fetching schedules, and filtering timelines for a specified period).
+- [ ] Production and holiday calendar support.
+- [ ] Data synchronization: CalDAV protocol support for seamless import/export (Google Calendar, Yandex, iCloud, etc.).
+- [ ] Mobile app development for iOS and Android.
+
 
