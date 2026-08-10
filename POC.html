@@ -932,9 +932,10 @@ function renderRowDays(r,y,lvl){
     ctx.fillText(String(date.getDate()),x+6,y+L.dateY);
     if(first){ctx.font=`${10*L.cs}px ui-monospace,monospace`;ctx.fillStyle='#7aa2ff';ctx.fillText(MF[date.getMonth()],x+6,y+L.dateY+16*L.cs);}
   }
-  drawDayEvents(r,y,lvl);
+  drawDayEvents(r,y,lvl,cachedLayout);
 }
-function drawDayEvents(r,y,lvl){
+function drawDayEvents(r,y,lvl,L){
+  if(!L)L=layout(state.zoom);
   const bars=computeRowBars(r);
   const cs=contentScale(state.zoom);
   for(const b of bars){
