@@ -53,6 +53,7 @@
   #slider-marks { display:flex; justify-content:space-between; font-size:9px; color:#6b7684; margin-top:2px; }
   #slider-marks span { flex:1; text-align:center; border-left:1px solid #2a3444; }
   #slider-marks span:first-child { border-left:none; }
+  #slider-marks span:last-child { padding-right:4px; }
 </style>
 </head>
 <body>
@@ -183,6 +184,23 @@ const now=new Date();
 const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
 const anchorWeekStart=startOfWeek(today);
 const FIRSTTIME=new Date(2025,0,1);
+let lastNowUpdate=Date.now();
+
+function updateNowIfNeeded(){
+  // Обновляем текущее время каждые 5 минут (300000 мс) или по запросу
+  const elapsed=Date.now()-lastNowUpdate;
+  if(elapsed>=300000){
+    const newNow=new Date();
+    // Проверяем, изменилась ли дата/время существенно
+    if(newNow.getMinutes()!==now.getMinutes()||newNow.getHours()!==now.getHours()||
+       newNow.getDate()!==now.getDate()||newNow.getMonth()!==now.getMonth()){
+      now.setTime(newNow.getTime());
+      today.setFullYear(newNow.getFullYear(),newNow.getMonth(),newNow.getDate());
+      requestRender();
+    }
+    lastNowUpdate=Date.now();
+  }
+}
 
 const EVENTS=[
   {id:'bkp',   title:'DB Full Backup',plan:'night-backups',color:'#ff5c5c',type:'daily',       start:23*60+30,dur:120},
@@ -230,9 +248,10 @@ function describe(e){
 
 // ---------- вид и масштаб ----------
 const GUTTER=200, HEADER=42, BASE=150;
-const ZMIN_MAP=0.5, ZMAX_MAP=10.0;
-const ZMIN_TL=10.0, ZMAX_TL=25.0;
-const ZMIN_MR=0.25, ZMAX_MR=0.5;
+// Мин/макс зум для каждого режима
+const ZMIN_MAP=0.5,   ZMAX_MAP=10.0;   // режим "дни"
+const ZMIN_TL=10.0,   ZMAX_TL=25.0;    // режим "часы" (таймлайн)
+const ZMIN_MR=0.25,   ZMAX_MR=0.5;     // режим "месяцы"
 const BARRIER=3;
 const VIEW={cellW:BASE,rowH:BASE};
 const state={camX:0,camY:0,mouse:null,zoom:1,mode:'map',barrier:0,activeRow:0,saved:null,orientMonth:null,firstDayOfWeek:'mon'};
@@ -836,6 +855,8 @@ function loop(){
     }
     if(t>=1){transition=null;snapshotCanvas=null;}
   }
+  // Обновляем время каждые 5 минут без перерисовки, если нужно
+  updateNowIfNeeded();
   requestAnimationFrame(loop);
 }
 function render(){
@@ -845,15 +866,20 @@ function render(){
 }
 
 // ---------- режим КАРТА (дни) ----------
+let cachedLayout=null;
 function renderMap(){
   ctx.fillStyle='#0b0e14';ctx.fillRect(0,0,W,H);
   const lvl=VIEW;
   computeHover();
+  // Кэшируем layout для текущего зума
+  if(cachedLayout===null||cachedLayout.zoom!==state.zoom){
+    cachedLayout={zoom:state.zoom,...layout(state.zoom)};
+  }
   const gridH=H-HEADER,gridW=W-GUTTER;
   const r0=Math.floor(state.camY)-1,r1=Math.ceil(state.camY+gridH/lvl.rowH)+1;
   ctx.save();
   ctx.beginPath();ctx.rect(GUTTER,HEADER,gridW,gridH);ctx.clip();
-  for(let r=r0;r<=r1;r++){renderRowDays(r,HEADER+(r-state.camY)*lvl.rowH,lvl);}
+  for(let r=r0;r<=r1;r++){renderRowDays(r,HEADER+(r-state.camY)*lvl.rowH,lvl,cachedLayout);}
   ctx.strokeStyle='#1a212c';
   for(let r=r0;r<=r1;r++){const y=HEADER+(r-state.camY)*lvl.rowH;
     ctx.beginPath();ctx.moveTo(GUTTER,y+lvl.rowH+.5);ctx.lineTo(W,y+lvl.rowH+.5);ctx.stroke();}
@@ -862,7 +888,7 @@ function renderMap(){
   drawHoverOutline(lvl);
   drawTimeCursor();
   ctx.restore();
-  drawTopHeader(lvl);
+  drawTopHeader(lvl,cachedLayout);
   drawGutter(r0,r1,lvl);
   ctx.fillStyle='#0d1119';ctx.fillRect(0,0,GUTTER,HEADER);
   ctx.fillStyle='#4a5563';ctx.font='9px ui-monospace,monospace';
@@ -871,8 +897,8 @@ function renderMap(){
   ctx.beginPath();ctx.moveTo(0,HEADER+.5);ctx.lineTo(W,HEADER+.5);ctx.stroke();
   ctx.beginPath();ctx.moveTo(GUTTER+.5,0);ctx.lineTo(GUTTER+.5,H);ctx.stroke();
 }
-function renderRowDays(r,y,lvl){
-  const L=layout(state.zoom);
+function renderRowDays(r,y,lvl,L){
+  if(!L)L=layout(state.zoom);
   const k0=Math.floor(state.camX)-1,k1=Math.ceil(state.camX+(W-GUTTER)/lvl.cellW)+1;
   const isHoverRow=(hoverCell&&hoverCell.r===r);
   for(let k=k0;k<=k1;k++){
@@ -936,7 +962,7 @@ function renderRowDays(r,y,lvl){
 }
 function drawDayEvents(r,y,lvl){
   const bars=computeRowBars(r);
-  const cs=contentScale(state.zoom);
+  const cs=L.cs;
   for(const b of bars){
     const isHl=(hl.eventId!==null&&b.e.id===hl.eventId);
     ctx.globalAlpha=isHl?1:0.92;
@@ -1133,7 +1159,8 @@ function drawHoverOutline(lvl){
   ctx.strokeRect(x+1,y+1,lvl.cellW-2,lvl.rowH-2);
   ctx.lineWidth=1;
 }
-function drawTopHeader(lvl){
+function drawTopHeader(lvl,L){
+  if(!L)L=layout(state.zoom);
   ctx.fillStyle='#0d1119';ctx.fillRect(GUTTER,0,W-GUTTER,HEADER);
   ctx.save();
   ctx.beginPath();ctx.rect(GUTTER,0,W-GUTTER,HEADER);ctx.clip();
