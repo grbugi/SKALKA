@@ -229,11 +229,11 @@ function describe(e){
 }
 
 // ---------- вид и масштаб ----------
-const GUTTER=200, HEADER=42, BASE=150;
-const ZMIN_MAP=0.5, ZMAX_MAP=10.0;
-const ZMIN_TL=10.0, ZMAX_TL=25.0;
-const ZMIN_MR=0.25, ZMAX_MR=0.5;
-const BARRIER=3;
+const GUTTER=200, HEADER=42, BASE=150; //GUTTER — ширина левой панели с неделями/месяцами, HEADER — высота шапки с днями недели (пн…вс), BASE — базовый размер ячейки при zoom=1.0 (ширина = высота).в CSS-пикселях.
+const ZMIN_MAP=0.5, ZMAX_MAP=10.0; // — диапазон масштаба для «дней»: от 50% до 1000%.
+const ZMIN_TL=10.0, ZMAX_TL=25.0;  // — диапазон масштаба для «часов»: от 1000% до 2500%.
+const ZMIN_MR=0.25, ZMAX_MR=0.5;   // — диапазон масштаба для «месяцев»: от 50% до 25%.
+const BARRIER=3; //колличество "пустых" скроллов для перехода в другой режим масштаба
 const VIEW={cellW:BASE,rowH:BASE};
 const state={camX:0,camY:0,mouse:null,zoom:1,mode:'map',barrier:0,activeRow:0,saved:null,orientMonth:null,firstDayOfWeek:'mon'};
 
