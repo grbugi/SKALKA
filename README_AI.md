@@ -234,14 +234,14 @@ skalka/
 | лог-слайдер | Log-Slider | Logarithmic zoom slider divided into 3 equal segments (Months/Days/Hours). |
 | кросс-фейд | Cross-Fade | Transition effect between views (snapshot with fading alpha). |
 | якорь (`anchorWeekStart`) | Anchor | Current week's Monday; the grid's origin point. |
-| ориентир (`orientMonth`) | Reference Month | The specific month captured/focused when entering the "Months" view. |
+| месяц-ориентир (`orientMonth`) | Reference Month | The specific month captured/focused when entering the "Months" view. |
 | активная строка (`activeRow`)| Active Row | The single visible row in the "Hours" view. |
 
 ### Highlighting & Cursor
 | Russian Term | English Term | Description |
 | :--- | :--- | :--- |
 | подсветка координат | Coordinate Highlight | On cell hover: highlights column + row + month, plus corresponding gutter/header. |
-| подсветка между швами | Between-Seams Highlight | Highlights days of the cursor's month strictly between the nearest vertical seams. |
+| месяц между швами | Month Between-Seams Highlight | Highlights all days of the cursor's month strictly between the nearest vertical seams in "Days" ("map") View. Like in classic calendar.|
 | красная полоска | Red Line | Visual marker for the current time ("Now"). |
 | курсор времени | Time Cursor | Thin vertical line under the mouse pointer displaying the exact time label. |
 | прилипание (snap) | Snap | Time cursor magnetic attraction to event boundaries (20px radius). |
