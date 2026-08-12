@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -481,7 +482,8 @@ function hourLabelConfig(P){
 }
 
 let hl={dow:null,dowOrd:null,dateNum:null,weekNum:null,monthIdx:null,eventId:null,
-        hoverDow:null,hoverWeekNum:null,hoverMonthIdx:null,hoverMonthWeekStart:null};
+        hoverDow:null,hoverWeekNum:null,hoverMonthIdx:null,hoverMonthWeekStart:null,
+        hoverSeamLeft:null,hoverSeamRight:null};
 let hoverRegion=null,hoverCell=null,hoverHeaderK=null,hoverGutterR=null;
 
 function rowWeekStart(r){
@@ -595,7 +597,8 @@ function layout(Z){
 }
 function computeHover(){
   hl={dow:null,dowOrd:null,dateNum:null,weekNum:null,monthIdx:null,eventId:null,
-      hoverDow:null,hoverWeekNum:null,hoverMonthIdx:null,hoverMonthWeekStart:null};
+      hoverDow:null,hoverWeekNum:null,hoverMonthIdx:null,hoverMonthWeekStart:null,
+      hoverSeamLeft:null,hoverSeamRight:null};
   hoverRegion=null;hoverCell=null;hoverHeaderK=null;hoverGutterR=null;
   if(!state.mouse){statusEl.textContent='';return;}
   const mx=state.mouse.x,my=state.mouse.y,lvl=VIEW;
@@ -613,6 +616,23 @@ function computeHover(){
       hl.hoverWeekNum=weekNumberOfMonday(startOfWeekFDOW(date));
       hl.hoverMonthIdx=date.getFullYear()*12+date.getMonth();
       hl.hoverMonthWeekStart=startOfWeekFDOW(date);
+      // вычисляем вертикальную полосу между ближайшими швами для вида "дни"
+      // Нам нужно выделить 7 столбцов слева от ближайшего справа шва (включительно)
+      // Позиция внутри недели (0..6) с учётом firstDayOfWeek
+      let cellDow;
+      if(state.firstDayOfWeek==='sun'){
+        cellDow=date.getDay(); // 0=вс, 1=пн, ..., 6=сб
+      } else {
+        cellDow=dowMon0(date); // 0=пн, 1=вт, ..., 6=вс
+      }
+      // Шов справа - это конец недели (позиция 6 в локальной неделе)
+      const daysToSeamRight = (6 - cellDow + 7) % 7;
+      const rightSeamCol = k + daysToSeamRight;
+      // Левая граница - 6 дней до правого шва (всего 7 дней)
+      const leftCol = rightSeamCol - 6;
+      // Сохраняем абсолютные индексы колонок
+      hl.hoverSeamLeft = leftCol;
+      hl.hoverSeamRight = rightSeamCol;
       const bars=computeRowBars(r);
       let hb=null;
       for(const b of bars){if(mx>=b.x0&&mx<=b.x1&&my>=b.y0&&my<=b.y1){hb=b;break;}}
@@ -954,12 +974,15 @@ function renderRowDays(r,y,lvl){
     // подсветка координат при наведении (6-9%)
     if(hl.hoverDow!==null&&dow===hl.hoverDow){ctx.fillStyle='rgba(77,208,225,0.07)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
     if(isHoverRow){ctx.fillStyle='rgba(67,209,124,0.07)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
-    // подсветка месяца между ближайшими швами
-    if(hl.hoverMonthIdx!==null&&hl.hoverMonthWeekStart!==null&&(date.getFullYear()*12+date.getMonth())===hl.hoverMonthIdx){
-      const cellWeekStart=startOfWeekFDOW(date);
-      if(sameDay(cellWeekStart,hl.hoverMonthWeekStart)){
-        ctx.fillStyle='rgba(100,170,255,0.07)';
-        ctx.fillRect(x,y,lvl.cellW,lvl.rowH);
+    // подсветка силуэта месяца ярким желтым цветом (для отладки логики)
+    if(hl.hoverMonthIdx!==null&&hl.hoverSeamLeft!==null&&hl.hoverSeamRight!==null){
+      const cellMonthIdx=date.getFullYear()*12+date.getMonth();
+      if(cellMonthIdx===hl.hoverMonthIdx){
+        // Проверяем, попадает ли ячейка в диапазон из 7 столбцов
+        if(k>=hl.hoverSeamLeft&&k<=hl.hoverSeamRight){
+          ctx.fillStyle='rgba(255,255,0,0.5)';  // яркий желтый для отладки
+          ctx.fillRect(x,y,lvl.cellW,lvl.rowH);
+        }
       }
     }
     // существующие подсветки
@@ -994,9 +1017,26 @@ function renderRowDays(r,y,lvl){
     ctx.fillStyle=(hl.dowOrd&&ord===hl.dowOrd.ord&&dow===hl.dowOrd.dow)?'#c58aff':'#dfe6ef';
     ctx.fillText(DWU[dow],x+6+wOrd+wEnd+ctx.measureText(' ').width,y+L.ordY);
     ctx.font=`bold ${24*L.cs}px ui-monospace,monospace`;
-    ctx.fillStyle=first?'#7aa2ff':(hl.dateNum===date.getDate()?'#ffd24d':'#dfe6ef');
+    const isToday = sameDay(date, today);
+    // Determine day number color with priority: Today > 1st of month > Highlighted silhouette > Default
+    let dayColor = '#808590'; // Default gray
+    if (isToday) {
+      dayColor = '#ff3333'; // Red for today
+    } else if (first) {
+      dayColor = date.getMonth() % 2 === 0 ? '#9664ff' : '#3cdcc8'; // Gradient colors for 1st
+    } else if (hl.active && k >= hl.hoverSeamLeft && k <= hl.hoverSeamRight && date.getMonth() === hl.hoverMonth) {
+      dayColor = '#dfe6ef'; // Light gray for highlighted month silhouette
+    }
+    ctx.fillStyle = dayColor;
     ctx.fillText(String(date.getDate()),x+6,y+L.dateY);
-    if(first){ctx.font=`${10*L.cs}px ui-monospace,monospace`;ctx.fillStyle='#7aa2ff';ctx.fillText(MF[date.getMonth()],x+6,y+L.dateY+16*L.cs);}
+    if(first){
+      ctx.font=`${10*L.cs}px ui-monospace,monospace`;
+      // Month name color: Today > 1st of month colors
+      let monthColor = date.getMonth() % 2 === 0 ? '#9664ff' : '#3cdcc8';
+      if (isToday) monthColor = '#ff3333';
+      ctx.fillStyle = monthColor;
+      ctx.fillText(MF[date.getMonth()],x+6,y+L.dateY+16*L.cs);
+    }
   }
   drawDayEvents(r,y,lvl);
 }
@@ -1464,7 +1504,16 @@ function renderMonthRowRow(r,y,lvl){
     const seamDow=state.firstDayOfWeek==='sun'?5:6;
     if(dow===seamDow){ctx.fillStyle='rgba(122,162,255,0.45)';ctx.fillRect(x+lvl.cellW-3,y,3,lvl.rowH);}
     ctx.font=`bold ${Math.round(14*numScale)}px ui-monospace,monospace`;
-    ctx.fillStyle=first?'#7aa2ff':(hl.dateNum===date.getDate()?'#ffd24d':'#dfe6ef');
+    // Determine day number color with priority: Today > 1st of month > Highlighted silhouette > Default
+    let monthColor = '#808590'; // Default gray
+    if (sameDay(date, today)) {
+      monthColor = '#ff3333'; // Red for today
+    } else if (first) {
+      monthColor = date.getMonth() % 2 === 0 ? '#9664ff' : '#3cdcc8'; // Gradient colors for 1st
+    } else if (hl.active && k >= hl.hoverSeamLeft && k <= hl.hoverSeamRight && date.getMonth() === hl.hoverMonth) {
+      monthColor = '#dfe6ef'; // Light gray for highlighted month silhouette
+    }
+    ctx.fillStyle = monthColor;
     ctx.fillText(String(date.getDate()),x+6,y+lvl.rowH*0.6);
   }
   const bars=computeMonthRowBars(r);
