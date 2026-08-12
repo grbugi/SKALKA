@@ -1,1 +1,1 @@
-Nothing needs to be added to .gitignore since the changes only include HTML files (.html) which are source files and not build artifacts, dependencies, or temporary files.
+Nothing needs to be added to .gitignore since only a single HTML file (POC.html) was modified and no build artifacts, dependencies, or temporary files were detected in the changes.
