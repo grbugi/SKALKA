@@ -40,15 +40,22 @@
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #zoom-controls { position:fixed; right:12px; bottom:12px; display:flex; flex-direction:column;
     gap:6px; align-items:flex-end; z-index:100; }
-  #zoom-bar { display:flex; align-items:center; gap:4px; width:200px; height:26px; }
-  #zoom-bar button, #zoomPct { height:26px; box-sizing:border-box; background:#1a2332; color:#7aa2ff;
+  #zoom-bar { display:flex; align-items:center; gap:4px; width:280px; height:26px; justify-content:space-between; }
+  #date-selector-bar { display:flex; align-items:center; gap:4px; width:280px; height:26px; }
+  #zoom-bar button, #zoomPct, .datebar-input, .datebar-select, .datebar-btn { height:26px; box-sizing:border-box; background:#1a2332; color:#7aa2ff;
     border:1px solid #2a3444; border-radius:4px; cursor:pointer; font:inherit; font-size:12px; line-height:1;
     display:flex; align-items:center; justify-content:center; }
-  #zoom-bar button:hover, #zoomPct:hover { background:#1e2836; color:#a8c5ff; }
-  #gonow { flex:1; }
+  #zoom-bar button:hover, #zoomPct:hover, .datebar-input:hover, .datebar-select:hover, .datebar-btn:hover { background:#1e2836; color:#a8c5ff; }
+  #date-selector-bar button:hover, #date-selector-bar input:hover, #date-selector-bar select:hover { background:#1e2836; color:#a8c5ff; }
+  #gonow-wrap { display:flex; align-items:center; gap:4px; flex:1; min-width:0; justify-content:flex-start; }
+  #gonow { flex:none; white-space:nowrap; min-width:100px; justify-content:flex-start; padding-left:8px; }
+  #zoom-group { display:flex; align-items:center; gap:4px; flex:1; min-width:0; justify-content:flex-end; }
   #zoom-out, #zoom-in { width:26px; flex:none; }
-  #zoomPct { flex:1; min-width:0; }
-  #slider-wrap { width:200px; }
+  #zoomPct { flex:none; width:60px; justify-content:center; }
+  .datebar-input { width:54px; padding:0 4px; background:#161d29; color:#dfe6ef; }
+  .datebar-select { flex:1; min-width:80px; padding:0 4px; background:#161d29; color:#dfe6ef; }
+  .datebar-btn { flex:none; padding:0 8px; background:#1a2332; color:#7aa2ff; white-space:nowrap; width:26px; }
+  #slider-wrap { width:280px; }
   #zoomSlider { width:100%; cursor:pointer; accent-color:#7aa2ff; }
   #slider-marks { display:flex; justify-content:space-between; font-size:9px; color:#6b7684; margin-top:2px; }
   #slider-marks span { flex:1; text-align:center; border-left:1px solid #2a3444; }
@@ -69,12 +76,6 @@
       <option value="sun">вс</option>
     </select>
   </div>
-  <div class="datebar">
-    <input id="selDay" type="number" min="1" max="31" title="день">
-    <select id="selMonth" title="месяц"></select>
-    <input id="selYear" type="number" title="год">
-    <button id="showDate" title="перейти к дате">показать</button>
-  </div>
   <div id="anchor"></div>
   <div id="legend"></div>
   <div class="help">
@@ -91,11 +92,21 @@
 </div>
 <div id="status"></div>
 <div id="zoom-controls">
+  <div id="date-selector-bar" role="group" aria-label="Выбор даты">
+    <input id="selDay" class="datebar-input" type="number" min="1" max="31" title="день" tabindex="0">
+    <select id="selMonth" class="datebar-select" title="месяц" tabindex="0"></select>
+    <input id="selYear" class="datebar-input" type="number" title="год" tabindex="0" style="width:64px">
+    <button id="showDate" class="datebar-btn" title="перейти к дате" tabindex="0">▶</button>
+  </div>
   <div id="zoom-bar">
-    <button id="gonow" title="текущий момент"><span style="color:#ff4d4d">●</span>&nbsp;сейчас</button>
-    <button id="zoom-out" title="уменьшить (dblclick — к месяцам)">−</button>
-    <div id="zoomPct" title="сбросить масштаб">100%</div>
-    <button id="zoom-in" title="увеличить (dblclick — к часам)">+</button>
+    <div id="gonow-wrap">
+      <button id="gonow" title="текущий момент"><span style="color:#ff4d4d">●</span>&nbsp;сейчас</button>
+    </div>
+    <div id="zoom-group">
+      <button id="zoom-out" title="уменьшить (dblclick — к месяцам)">−</button>
+      <div id="zoomPct" title="сбросить масштаб">100%</div>
+      <button id="zoom-in" title="увеличить (dblclick — к часам)">+</button>
+    </div>
   </div>
   <div id="slider-wrap" title="масштаб (лог. шкала)">
     <input type="range" id="zoomSlider" min="0" max="300" step="1">
@@ -1498,6 +1509,8 @@ function handleZoomWheel(dy,mx,my){
 }
 window.addEventListener('wheel',e=>{
   if(e.target.closest&&e.target.closest('#hud'))return;
+  // если фокус в селекторе даты — не обрабатываем колесо для зума/пана, даём скроллить input/select
+  if(e.target.closest&&e.target.closest('#date-selector-bar'))return;
   e.preventDefault();
   if(e.ctrlKey){
     let dy=e.deltaY;
@@ -1540,6 +1553,12 @@ window.addEventListener('keydown',e=>{
   else if(e.key==='ArrowUp'&&state.mode!=='timeline'){state.camY-=.2;requestRender();}
   else if(e.key==='ArrowDown'&&state.mode!=='timeline'){state.camY+=.2;requestRender();}
 });
+
+// клавиатурная доступность для селектора даты: Enter в полях вызывает переход
+document.getElementById('selDay').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
+document.getElementById('selMonth').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
+document.getElementById('selYear').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
+document.getElementById('showDate').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();centerOnDate(readDateSelector());}});
 
 function rr(x,y,w,h,r){
   ctx.beginPath();
