@@ -1,6 +1,6 @@
-### English title
+### Epic: PoC (POC.html) — Critical fixes, date/time correctness, performance and architecture
 #### EN
-Epic: PoC (POC.html) — Critical fixes, date/time correctness, performance and architecture
+
 
 This epic groups work to stabilize the PoC (POC.html): fix runtime errors and transition edge-cases, make date calculations robust (UTC-based day indices), optimize hot rendering paths where needed, add a minimal set of tests for critical date/event logic, and prepare the codebase for a future refactor and documentation phase once UX is validated.
 
@@ -23,8 +23,8 @@ Checklist:
 Suggested labels: epic, priority:high, enhancement
 
 #### RU
-### Русский заголовок
-Epic: PoC (POC.html) — критические исправления, корректность дат/времени, производительность и архитектура
+### Epic: PoC (POC.html) — критические исправления, корректность дат/времени, производительность и архитектура
+
 
 Этот epic объединяет работу по стабилизации PoC (POC.html): исправление runtime‑ошибок и пограничных багов переходов, переход к корректным вычислениям дат (UTC), оптимизация горячих путей рендера там, где это действительно нужно, добавление минимального набора тестов для критичных утилит и подготовка к рефакторингу/документации после валидации UX.
 
