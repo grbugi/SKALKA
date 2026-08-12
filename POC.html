@@ -40,28 +40,15 @@
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #zoom-controls { position:fixed; right:12px; bottom:12px; display:flex; flex-direction:column;
     gap:6px; align-items:flex-end; z-index:100; }
-  .nav-panel { display:flex; flex-direction:column; gap:6px; align-items:stretch; width:280px; }
-  .nav-row { display:flex; align-items:center; gap:4px; width:100%; height:26px; }
-  /* Row 1: Date selector */
-  .datebar { display:flex; gap:4px; flex:1; }
-  .datebar input,.datebar select { background:#161d29; color:#dfe6ef; border:1px solid #2a3444;
-    border-radius:4px; font:inherit; padding:3px 4px; }
-  .datebar input[type=number]{ width:54px; }
-  .datebar select { flex:1; min-width:0; }
-  .datebar button { background:#1a2332; color:#7aa2ff; border:1px solid #2a3444;
-    border-radius:4px; cursor:pointer; font:inherit; padding:3px 8px; min-width:26px; }
-  .datebar button:hover { background:#223047; }
-  /* Row 2: Now button + zoom controls */
-  #zoom-bar { display:flex; align-items:center; gap:4px; flex:1; }
+  #zoom-bar { display:flex; align-items:center; gap:4px; width:200px; height:26px; }
   #zoom-bar button, #zoomPct { height:26px; box-sizing:border-box; background:#1a2332; color:#7aa2ff;
     border:1px solid #2a3444; border-radius:4px; cursor:pointer; font:inherit; font-size:12px; line-height:1;
     display:flex; align-items:center; justify-content:center; }
   #zoom-bar button:hover, #zoomPct:hover { background:#1e2836; color:#a8c5ff; }
-  #gonow { flex:1; min-width:100px; justify-content:flex-start; padding-left:8px; }
+  #gonow { flex:1; }
   #zoom-out, #zoom-in { width:26px; flex:none; }
-  #zoomPct { width:72px; flex:none; }
-  /* Row 3: Slider */
-  #slider-wrap { width:100%; }
+  #zoomPct { flex:1; min-width:0; }
+  #slider-wrap { width:200px; }
   #zoomSlider { width:100%; cursor:pointer; accent-color:#7aa2ff; }
   #slider-marks { display:flex; justify-content:space-between; font-size:9px; color:#6b7684; margin-top:2px; }
   #slider-marks span { flex:1; text-align:center; border-left:1px solid #2a3444; }
@@ -82,6 +69,12 @@
       <option value="sun">вс</option>
     </select>
   </div>
+  <div class="datebar">
+    <input id="selDay" type="number" min="1" max="31" title="день">
+    <select id="selMonth" title="месяц"></select>
+    <input id="selYear" type="number" title="год">
+    <button id="showDate" title="перейти к дате">показать</button>
+  </div>
   <div id="anchor"></div>
   <div id="legend"></div>
   <div class="help">
@@ -98,26 +91,15 @@
 </div>
 <div id="status"></div>
 <div id="zoom-controls">
-  <div class="nav-panel">
-    <!-- Row 1: Date selector -->
-    <div class="nav-row datebar">
-      <input id="selDay" type="number" min="1" max="31" title="день">
-      <select id="selMonth" title="месяц"></select>
-      <input id="selYear" type="number" title="год">
-      <button id="showDate" title="перейти к дате">▶</button>
-    </div>
-    <!-- Row 2: Now button + zoom controls -->
-    <div class="nav-row" id="zoom-bar">
-      <button id="gonow" title="текущий момент"><span style="color:#ff4d4d">●</span>&nbsp;сейчас</button>
-      <button id="zoom-out" title="уменьшить (dblclick — к месяцам)">−</button>
-      <div id="zoomPct" title="сбросить масштаб">100%</div>
-      <button id="zoom-in" title="увеличить (dblclick — к часам)">+</button>
-    </div>
-    <!-- Row 3: Slider -->
-    <div id="slider-wrap" title="масштаб (лог. шкала)">
-      <input type="range" id="zoomSlider" min="0" max="300" step="1">
-      <div id="slider-marks"><span>месяцы</span><span>дни</span><span>часы</span></div>
-    </div>
+  <div id="zoom-bar">
+    <button id="gonow" title="текущий момент"><span style="color:#ff4d4d">●</span>&nbsp;сейчас</button>
+    <button id="zoom-out" title="уменьшить (dblclick — к месяцам)">−</button>
+    <div id="zoomPct" title="сбросить масштаб">100%</div>
+    <button id="zoom-in" title="увеличить (dblclick — к часам)">+</button>
+  </div>
+  <div id="slider-wrap" title="масштаб (лог. шкала)">
+    <input type="range" id="zoomSlider" min="0" max="300" step="1">
+    <div id="slider-marks"><span>месяцы</span><span>дни</span><span>часы</span></div>
   </div>
 </div>
 
@@ -950,10 +932,9 @@ function renderRowDays(r,y,lvl){
     ctx.fillText(String(date.getDate()),x+6,y+L.dateY);
     if(first){ctx.font=`${10*L.cs}px ui-monospace,monospace`;ctx.fillStyle='#7aa2ff';ctx.fillText(MF[date.getMonth()],x+6,y+L.dateY+16*L.cs);}
   }
-  drawDayEvents(r,y,lvl,cachedLayout);
+  drawDayEvents(r,y,lvl);
 }
-function drawDayEvents(r,y,lvl,L){
-  if(!L)L=layout(state.zoom);
+function drawDayEvents(r,y,lvl){
   const bars=computeRowBars(r);
   const cs=contentScale(state.zoom);
   for(const b of bars){
@@ -1516,7 +1497,6 @@ function handleZoomWheel(dy,mx,my){
 }
 window.addEventListener('wheel',e=>{
   if(e.target.closest&&e.target.closest('#hud'))return;
-  if(e.target.closest&&e.target.closest('#zoom-controls'))return;
   e.preventDefault();
   if(e.ctrlKey){
     let dy=e.deltaY;
@@ -1584,34 +1564,16 @@ function initDateSelector(){
   MF.forEach((n,i)=>{const o=document.createElement('option');o.value=i;o.textContent=n;sm.appendChild(o);});
   setDateSelector(today);
   document.getElementById('showDate').onclick=()=>centerOnDate(readDateSelector());
-  document.getElementById('showDate').addEventListener('keydown',e=>{
-    if(e.key==='Enter'||e.key===' '){e.preventDefault();centerOnDate(readDateSelector());}
-  });
   document.getElementById('gonow').onclick=()=>{setDateSelector(today);goNow();};
-  document.getElementById('gonow').addEventListener('keydown',e=>{
-    if(e.key==='Enter'||e.key===' '){e.preventDefault();setDateSelector(today);goNow();}
-  });
   document.getElementById('zoomPct').onclick=resetZoom;
-  document.getElementById('zoomPct').addEventListener('keydown',e=>{
-    if(e.key==='Enter'||e.key===' '){e.preventDefault();resetZoom();}
-  });
   document.getElementById('zoom-in').onclick=()=>zoomStep(1);
   document.getElementById('zoom-out').onclick=()=>zoomStep(-1);
   document.getElementById('zoom-in').ondblclick=()=>zoomDbl(1);
   document.getElementById('zoom-out').ondblclick=()=>zoomDbl(-1);
-  ['zoom-in','zoom-out'].forEach(id=>{
-    document.getElementById(id).addEventListener('keydown',e=>{
-      if(e.key==='Enter'||e.key===' '){e.preventDefault();if(id==='zoom-in')zoomStep(1);else zoomStep(-1);}
-    });
-  });
   const sl=document.getElementById('zoomSlider');
   sl.addEventListener('input',()=>{
     if(sliderLock)return;
     setZoomFromSlider(sliderToZoom(parseFloat(sl.value)));
-  });
-  sl.addEventListener('keydown',e=>{
-    if(e.key==='ArrowLeft'){e.preventDefault();zoomStep(-1);}
-    else if(e.key==='ArrowRight'){e.preventDefault();zoomStep(1);}
   });
   document.getElementById('fdowSelect').onchange=()=>{
     state.firstDayOfWeek=document.getElementById('fdowSelect').value;
@@ -1638,15 +1600,12 @@ function updateHud(){
   }
 })();
 
-// ---------- инициализация при загрузке ----------
-(function init(){
-  resize();
-  applyZoom();
-  initDateSelector();
-  goNow();
-  updateHud();
-  requestAnimationFrame(loop);
-})();
+resize();
+applyZoom();
+initDateSelector();
+goNow();
+updateHud();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
