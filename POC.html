@@ -62,11 +62,27 @@
   #zoomSlider { width:100%; cursor:pointer; accent-color:#7aa2ff; }
   #slider-labels { display:flex; justify-content:space-between; font-size:9px; color:#6b7684; margin-top:2px; width:280px; }
   #slider-labels span { flex:1; text-align:center; }
+  #debugOverlay { position:fixed; top:12px; left:12px; padding:10px 12px;
+    background:rgba(13,17,25,.92); border:1px solid #232b38; border-radius:6px;
+    font:14px ui-monospace,monospace; color:#9fb0c3; z-index:99; pointer-events:none;
+    display:none; line-height:1.6; }
+  #debugOverlay .row { display:flex; gap:16px; white-space:nowrap; }
+  #debugOverlay .label { color:#8a9bb0; }
+  #debugOverlay .val { color:#7aa2ff; font-variant-numeric:tabular-nums; }
+  #debugOverlay.visible { display:block; }
 </style>
 </head>
 <body>
 <canvas id="cv"></canvas>
 <button id="toggleHud" title="Скрыть/показать панель">☰</button>
+<div id="debugOverlay">
+  <div class="row"><span class="label">FPS:</span><span class="val" id="dbgFps">0</span></div>
+  <div class="row"><span class="label">Viewport X:</span><span class="val" id="dbgVpX">0</span></div>
+  <div class="row"><span class="label">Viewport Y:</span><span class="val" id="dbgVpY">0</span></div>
+  <div class="row"><span class="label">Cells:</span><span class="val" id="dbgCells">0</span></div>
+  <div class="row"><span class="label">Events:</span><span class="val" id="dbgEvents">0</span></div>
+  <div class="row"><span class="label">Render:</span><span class="val" id="dbgRender">0ms</span></div>
+</div>
 
 <div id="hud">
   <div class="brand">SKALKA <span>PoC</span></div>
@@ -835,9 +851,42 @@ function centerOnDate(date){
 // ---------- рендер-диспетчер ----------
 let need=true;
 const requestRender=()=>{need=true;};
+// FPS counter
+let frameCount=0,lastFpsTime=performance.now(),currentFps=0;
+// Debug overlay state
+let debugOverlayEnabled=false;
+// Render timing
+let lastRenderStart=0,visibleCells=0,visibleEvents=0;
+
+function updateDebugOverlay(renderTimeMs){
+  if(!debugOverlayEnabled)return;
+  const now=performance.now();
+  frameCount++;
+  if(now-lastFpsTime>=500){
+    currentFps=Math.round(frameCount*1000/(now-lastFpsTime));
+    frameCount=0;
+    lastFpsTime=now;
+    document.getElementById('dbgFps').textContent=currentFps;
+  }
+  const gutterOffset=(state.mode==='timeline')?0:GUTTER;
+  const vpCenterX=state.camX+(W/2-gutterOffset)/VIEW.cellW;
+  const vpCenterY=state.camY+(H/2-HEADER)/VIEW.rowH;
+  document.getElementById('dbgVpX').textContent=vpCenterX.toFixed(2);
+  document.getElementById('dbgVpY').textContent=vpCenterY.toFixed(2);
+  document.getElementById('dbgCells').textContent=visibleCells;
+  document.getElementById('dbgEvents').textContent=visibleEvents;
+  document.getElementById('dbgRender').textContent=renderTimeMs.toFixed(1)+'ms';
+}
+
 function loop(){
   if(transition){need=true;}
-  if(need){need=false;render();}
+  if(need){
+    need=false;
+    const renderStart=performance.now();
+    render();
+    const renderTime=performance.now()-renderStart;
+    updateDebugOverlay(renderTime);
+  }
   if(transition&&snapshotCanvas){
     const elapsed=performance.now()-transition.start;
     const t=Math.min(elapsed/transition.duration,1);
@@ -866,6 +915,8 @@ function renderMap(){
   computeHover();
   const gridH=H-HEADER,gridW=W-GUTTER;
   const r0=Math.floor(state.camY)-1,r1=Math.ceil(state.camY+gridH/lvl.rowH)+1;
+  const k0=Math.floor(state.camX)-1,k1=Math.ceil(state.camX+(W-GUTTER)/lvl.cellW)+1;
+  visibleCells=(r1-r0+1)*(k1-k0+1);
   ctx.save();
   ctx.beginPath();ctx.rect(GUTTER,HEADER,gridW,gridH);ctx.clip();
   for(let r=r0;r<=r1;r++){renderRowDays(r,HEADER+(r-state.camY)*lvl.rowH,lvl);}
@@ -951,6 +1002,7 @@ function renderRowDays(r,y,lvl){
 }
 function drawDayEvents(r,y,lvl){
   const bars=computeRowBars(r);
+  visibleEvents=bars.length;
   const cs=contentScale(state.zoom);
   for(const b of bars){
     const isHl=(hl.eventId!==null&&b.e.id===hl.eventId);
@@ -1208,6 +1260,7 @@ function renderTimeline(){
   const ch=VIEW.rowH,y=(H-ch)/2;
   const lvl=VIEW;
   const k0=Math.floor(state.camX)-1,k1=Math.ceil(state.camX+W/lvl.cellW)+1;
+  visibleCells=k1-k0+1;
   for(let k=k0;k<=k1;k++){
     const date=addDays(anchorWeekStart,7*r+k);
     const x=(k-state.camX)*lvl.cellW;
@@ -1261,6 +1314,7 @@ function renderTimelineDayCell(date,x,y,cw,ch){
 }
 function renderTimelineEvents(){
   const bars=computeTimelineBars();
+  visibleEvents=bars.length;
   for(const b of bars){
     if(b.x1<0||b.x0>W)continue;
     const isHl=(hl.eventId!==null&&b.e.id===hl.eventId);
@@ -1345,6 +1399,8 @@ function renderMonthRow(){
   computeHover();
   const gridH=H-HEADER,gridW=W-GUTTER;
   const r0=Math.floor(state.camY)-1,r1=Math.ceil(state.camY+gridH/lvl.rowH)+1;
+  const k0=Math.floor(state.camX)-1,k1=Math.ceil(state.camX+(W-GUTTER)/lvl.cellW)+1;
+  visibleCells=(r1-r0+1)*(k1-k0+1);
   ctx.save();
   ctx.beginPath();ctx.rect(GUTTER,HEADER,gridW,gridH);ctx.clip();
   for(let r=r0;r<=r1;r++){
@@ -1412,6 +1468,7 @@ function renderMonthRowRow(r,y,lvl){
     ctx.fillText(String(date.getDate()),x+6,y+lvl.rowH*0.6);
   }
   const bars=computeMonthRowBars(r);
+  visibleEvents=bars.length;
   for(const b of bars){
     const isHl=(hl.eventId!==null&&b.e.id===hl.eventId);
     ctx.globalAlpha=isHl?1:0.8;
@@ -1511,7 +1568,7 @@ function handleZoomWheel(dy,mx,my){
   requestRender();
 }
 window.addEventListener('wheel',e=>{
-  if(e.target.closest&&e.target.closest('#hud,#zoom-controls'))return;
+  if(e.target.closest&&e.target.closest('#hud,#zoom-controls,#debugOverlay'))return;
   e.preventDefault();
   if(e.ctrlKey){
     let dy=e.deltaY;
@@ -1553,7 +1610,16 @@ window.addEventListener('keydown',e=>{
   else if(e.key==='ArrowRight'){state.camX+=1;requestRender();}
   else if(e.key==='ArrowUp'&&state.mode!=='timeline'){state.camY-=.2;requestRender();}
   else if(e.key==='ArrowDown'&&state.mode!=='timeline'){state.camY+=.2;requestRender();}
+  else if(e.key==='F2'){toggleDebugOverlay();}
 });
+
+function toggleDebugOverlay(){
+  debugOverlayEnabled=!debugOverlayEnabled;
+  const overlay=document.getElementById('debugOverlay');
+  if(overlay){
+    overlay.classList.toggle('visible',debugOverlayEnabled);
+  }
+}
 
 function rr(x,y,w,h,r){
   ctx.beginPath();
@@ -1634,11 +1700,22 @@ function initDateSelector(){
     const hud=document.getElementById('hud');
     hud.style.display=hud.style.display==='none'?'':'none';
   };
+  // Debug overlay toggle with keyboard shortcut hint in help section
 }
 
 // ---------- HUD ----------
 function updateHud(){
   document.getElementById('anchor').textContent='фокус: '+MF[today.getMonth()]+' '+today.getFullYear();
+  // Add debug overlay info to HUD help section
+  const helpEl=document.querySelector('.help');
+  if(helpEl && !helpEl.querySelector('.debug-hint')){
+    const debugHint=document.createElement('div');
+    debugHint.className='debug-hint';
+    debugHint.style.marginTop='6px';
+    debugHint.style.color='#4a5563';
+    debugHint.textContent='F2 — оверлей отладки';
+    helpEl.appendChild(debugHint);
+  }
 }
 (function buildLegend(){
   const el=document.getElementById('legend');
