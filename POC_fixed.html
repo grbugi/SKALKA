@@ -1554,6 +1554,12 @@ window.addEventListener('keydown',e=>{
   else if(e.key==='ArrowDown'&&state.mode!=='timeline'){state.camY+=.2;requestRender();}
 });
 
+// клавиатурная доступность для селектора даты: Enter в полях вызывает переход
+document.getElementById('selDay').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
+document.getElementById('selMonth').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
+document.getElementById('selYear').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
+document.getElementById('showDate').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();centerOnDate(readDateSelector());}});
+
 function rr(x,y,w,h,r){
   ctx.beginPath();
   if(ctx.roundRect){ctx.roundRect(x,y,w,h,r);return;}
@@ -1597,15 +1603,6 @@ function initDateSelector(){
     const hud=document.getElementById('hud');
     hud.style.display=hud.style.display==='none'?'':'none';
   };
-  // клавиатурная доступность для селектора даты: Enter в полях вызывает переход
-  const sd=document.getElementById('selDay');
-  const sm2=document.getElementById('selMonth');
-  const sy=document.getElementById('selYear');
-  const shd=document.getElementById('showDate');
-  if(sd)sd.addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
-  if(sm2)sm2.addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
-  if(sy)sy.addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
-  if(shd)shd.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();centerOnDate(readDateSelector());}});
 }
 
 // ---------- HUD ----------
