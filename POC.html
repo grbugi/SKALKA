@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>SKALKA PoC</title>
+<title>Loopiral PoC — дни недели + месяцы</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -60,7 +60,7 @@
 <button id="toggleHud" title="Скрыть/показать панель">☰</button>
 
 <div id="hud">
-  <div class="brand">SKALKA <span>PoC</span></div>
+  <div class="brand">LOOPiRAL <span>PoC</span></div>
   <div class="sub">режимы: месяцы · дни · часы<br>переход — 3 скролла за порог масштаба</div>
   <div class="fdow-bar">
     <span>Первый день недели:</span>
@@ -229,11 +229,11 @@ function describe(e){
 }
 
 // ---------- вид и масштаб ----------
-const GUTTER=200, HEADER=42, BASE=150; //GUTTER — ширина левой панели с неделями/месяцами, HEADER — высота шапки с днями недели (пн…вс), BASE — базовый размер ячейки при zoom=1.0 (ширина = высота).в CSS-пикселях.
-const ZMIN_MAP=0.5, ZMAX_MAP=10.0; // — диапазон масштаба для «дней»: от 50% до 1000%.
-const ZMIN_TL=10.0, ZMAX_TL=25.0;  // — диапазон масштаба для «часов»: от 1000% до 2500%.
-const ZMIN_MR=0.25, ZMAX_MR=0.5;   // — диапазон масштаба для «месяцев»: от 50% до 25%.
-const BARRIER=3; //колличество "пустых" скроллов для перехода в другой режим масштаба
+const GUTTER=200, HEADER=42, BASE=150;
+const ZMIN_MAP=0.5, ZMAX_MAP=10.0;
+const ZMIN_TL=10.0, ZMAX_TL=25.0;
+const ZMIN_MR=0.25, ZMAX_MR=0.5;
+const BARRIER=3;
 const VIEW={cellW:BASE,rowH:BASE};
 const state={camX:0,camY:0,mouse:null,zoom:1,mode:'map',barrier:0,activeRow:0,saved:null,orientMonth:null,firstDayOfWeek:'mon'};
 
@@ -932,10 +932,9 @@ function renderRowDays(r,y,lvl){
     ctx.fillText(String(date.getDate()),x+6,y+L.dateY);
     if(first){ctx.font=`${10*L.cs}px ui-monospace,monospace`;ctx.fillStyle='#7aa2ff';ctx.fillText(MF[date.getMonth()],x+6,y+L.dateY+16*L.cs);}
   }
-  drawDayEvents(r,y,lvl,cachedLayout);
+  drawDayEvents(r,y,lvl);
 }
-function drawDayEvents(r,y,lvl,L){
-  if(!L)L=layout(state.zoom);
+function drawDayEvents(r,y,lvl){
   const bars=computeRowBars(r);
   const cs=contentScale(state.zoom);
   for(const b of bars){
