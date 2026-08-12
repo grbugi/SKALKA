@@ -1507,15 +1507,12 @@ function renderMonthRowRow(r,y,lvl){
     const seamDow=state.firstDayOfWeek==='sun'?5:6;
     if(dow===seamDow){ctx.fillStyle='rgba(122,162,255,0.45)';ctx.fillRect(x+lvl.cellW-3,y,3,lvl.rowH);}
     ctx.font=`bold ${Math.round(14*numScale)}px ui-monospace,monospace`;
-    // Determine day number color with priority: Today > 1st of month > Highlighted silhouette > Default
-    let monthColor = '#808590'; // Default gray
+    // Determine day number color with priority: Today > 1st of month > Default
+    let monthColor = '#dfe6ef'; // Default gray
     if (sameDay(date, today)) {
       monthColor = '#ff3333'; // Red for today
     } else if (first) {
       monthColor = date.getMonth() % 2 === 0 ? '#9664ff' : '#3cdcc8'; // Gradient colors for 1st
-    } else if (hl.active && k >= hl.hoverSeamLeft && k <= hl.hoverSeamRight && date.getMonth() === hl.hoverMonth) {
-      monthColor = '#dfe6ef'; // Light gray for highlighted month silhouette
-    }
     ctx.fillStyle = monthColor;
     ctx.fillText(String(date.getDate()),x+6,y+lvl.rowH*0.6);
   }
