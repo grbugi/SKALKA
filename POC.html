@@ -40,19 +40,28 @@
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #zoom-controls { position:fixed; right:12px; bottom:12px; display:flex; flex-direction:column;
     gap:6px; align-items:flex-end; z-index:100; }
-  #zoom-bar { display:flex; align-items:center; gap:4px; width:200px; height:26px; }
-  #zoom-bar button, #zoomPct { height:26px; box-sizing:border-box; background:#1a2332; color:#7aa2ff;
+  .nav-row { width:280px; display:flex; align-items:center; gap:6px; }
+  #date-nav-btn { background:#1a2332; color:#7aa2ff; border:1px solid #2a3444;
+    border-radius:4px; cursor:pointer; font:inherit; padding:3px 8px; height:28px;
+    display:flex; align-items:center; justify-content:center; min-width:24px; font-size:12px; }
+  #date-nav-btn:hover { background:#223047; }
+  #nav-day, #nav-month, #nav-year { background:#161d29; color:#dfe6ef;
+    border:1px solid #2a3444; border-radius:4px; font:inherit; padding:3px 4px; box-sizing:border-box; }
+  #nav-day { width:54px; text-align:center; }
+  #nav-month { flex:1; min-width:0; }
+  #nav-year { width:60px; text-align:center; }
+  #zoom-bar { display:flex; align-items:center; gap:6px; width:280px; height:28px; }
+  #zoom-bar button, #zoomPct { height:28px; box-sizing:border-box; background:#1a2332; color:#7aa2ff;
     border:1px solid #2a3444; border-radius:4px; cursor:pointer; font:inherit; font-size:12px; line-height:1;
     display:flex; align-items:center; justify-content:center; }
-  #zoom-bar button:hover, #zoomPct:hover { background:#1e2836; color:#a8c5ff; }
-  #gonow { flex:1; }
-  #zoom-out, #zoom-in { width:26px; flex:none; }
-  #zoomPct { flex:1; min-width:0; }
-  #slider-wrap { width:200px; }
+  #zoom-bar button:hover, #zoomPct:hover { background:#223047; }
+  #gonow { flex:1; min-width:100px; justify-content:flex-start; padding-left:10px; }
+  #zoom-out, #zoom-in { width:28px; flex:none; padding:0; }
+  #zoomPct { width:72px; flex:none; }
+  #slider-wrap { width:280px; }
   #zoomSlider { width:100%; cursor:pointer; accent-color:#7aa2ff; }
-  #slider-marks { display:flex; justify-content:space-between; font-size:9px; color:#6b7684; margin-top:2px; }
-  #slider-marks span { flex:1; text-align:center; border-left:1px solid #2a3444; }
-  #slider-marks span:first-child { border-left:none; }
+  #slider-labels { display:flex; justify-content:space-between; font-size:9px; color:#6b7684; margin-top:2px; width:280px; }
+  #slider-labels span { flex:1; text-align:center; }
 </style>
 </head>
 <body>
@@ -68,12 +77,6 @@
       <option value="mon" selected>пн</option>
       <option value="sun">вс</option>
     </select>
-  </div>
-  <div class="datebar">
-    <input id="selDay" type="number" min="1" max="31" title="день">
-    <select id="selMonth" title="месяц"></select>
-    <input id="selYear" type="number" title="год">
-    <button id="showDate" title="перейти к дате">показать</button>
   </div>
   <div id="anchor"></div>
   <div id="legend"></div>
@@ -91,15 +94,27 @@
 </div>
 <div id="status"></div>
 <div id="zoom-controls">
+  <!-- Строка 1: Селектор даты -->
+  <div class="nav-row datebar" style="margin-bottom:0;">
+    <button id="date-nav-btn" title="Перейти к дате">▶</button>
+    <input type="number" id="nav-day" min="1" max="31" value="1" title="День">
+    <select id="nav-month" title="Месяц">
+    </select>
+    <input type="number" id="nav-year" min="1900" max="2100" value="2024" title="Год">
+  </div>
+  <!-- Строка 2: Кнопка Сейчас + масштаб -->
   <div id="zoom-bar">
     <button id="gonow" title="текущий момент"><span style="color:#ff4d4d">●</span>&nbsp;сейчас</button>
     <button id="zoom-out" title="уменьшить (dblclick — к месяцам)">−</button>
-    <div id="zoomPct" title="сбросить масштаб">100%</div>
+    <span id="zoomPct" title="сбросить масштаб" style="font-variant-numeric:tabular-nums;">100%</span>
     <button id="zoom-in" title="увеличить (dblclick — к часам)">+</button>
   </div>
-  <div id="slider-wrap" title="масштаб (лог. шкала)">
+  <!-- Строка 3: Слайдер времени -->
+  <div id="slider-wrap">
     <input type="range" id="zoomSlider" min="0" max="300" step="1">
-    <div id="slider-marks"><span>месяцы</span><span>дни</span><span>часы</span></div>
+    <div id="slider-labels">
+      <span>месяцы</span><span>дни</span><span>часы</span>
+    </div>
   </div>
 </div>
 
@@ -229,11 +244,11 @@ function describe(e){
 }
 
 // ---------- вид и масштаб ----------
-const GUTTER=200, HEADER=42, BASE=150;
-const ZMIN_MAP=0.5, ZMAX_MAP=10.0;
-const ZMIN_TL=10.0, ZMAX_TL=25.0;
-const ZMIN_MR=0.25, ZMAX_MR=0.5;
-const BARRIER=3;
+const GUTTER=200, HEADER=42, BASE=150; //GUTTER — ширина левой панели с неделями/месяцами, HEADER — высота шапки с днями недели (пн…вс), BASE — базовый размер ячейки при zoom=1.0 (ширина = высота).в CSS-пикселях.
+const ZMIN_MAP=0.5, ZMAX_MAP=10.0; // — диапазон масштаба для «дней»: от 50% до 1000%.
+const ZMIN_TL=10.0, ZMAX_TL=25.0;  // — диапазон масштаба для «часов»: от 1000% до 2500%.
+const ZMIN_MR=0.25, ZMAX_MR=0.5;   // — диапазон масштаба для «месяцев»: от 50% до 25%.
+const BARRIER=3; //колличество "пустых" скроллов для перехода в другой режим масштаба
 const VIEW={cellW:BASE,rowH:BASE};
 const state={camX:0,camY:0,mouse:null,zoom:1,mode:'map',barrier:0,activeRow:0,saved:null,orientMonth:null,firstDayOfWeek:'mon'};
 
@@ -1496,7 +1511,7 @@ function handleZoomWheel(dy,mx,my){
   requestRender();
 }
 window.addEventListener('wheel',e=>{
-  if(e.target.closest&&e.target.closest('#hud'))return;
+  if(e.target.closest&&e.target.closest('#hud,#zoom-controls'))return;
   e.preventDefault();
   if(e.ctrlKey){
     let dy=e.deltaY;
@@ -1549,21 +1564,57 @@ function rr(x,y,w,h,r){
 
 // ---------- селектор даты ----------
 function setDateSelector(d){
-  document.getElementById('selDay').value=d.getDate();
-  document.getElementById('selMonth').value=d.getMonth();
-  document.getElementById('selYear').value=d.getFullYear();
+  const navDay=document.getElementById('nav-day');
+  const navMonth=document.getElementById('nav-month');
+  const navYear=document.getElementById('nav-year');
+  if(navDay) navDay.value=d.getDate();
+  if(navMonth) navMonth.value=d.getMonth();
+  if(navYear) navYear.value=d.getFullYear();
 }
 function readDateSelector(){
-  const d=parseInt(document.getElementById('selDay').value,10)||1;
-  const m=parseInt(document.getElementById('selMonth').value,10)||0;
-  const y=parseInt(document.getElementById('selYear').value,10)||today.getFullYear();
+  const navDay=document.getElementById('nav-day');
+  const navMonth=document.getElementById('nav-month');
+  const navYear=document.getElementById('nav-year');
+  const d=parseInt(navDay?.value,10)||1;
+  const m=parseInt(navMonth?.value,10)||0;
+  const y=parseInt(navYear?.value,10)||today.getFullYear();
   return new Date(y,m,clamp(d,1,daysInMonth(y,m)));
 }
 function initDateSelector(){
-  const sm=document.getElementById('selMonth');
-  MF.forEach((n,i)=>{const o=document.createElement('option');o.value=i;o.textContent=n;sm.appendChild(o);});
-  setDateSelector(today);
-  document.getElementById('showDate').onclick=()=>centerOnDate(readDateSelector());
+  const navMonth=document.getElementById('nav-month');
+  MF.forEach((n,i)=>{const o=document.createElement('option');o.value=i;o.textContent=n;navMonth.appendChild(o);});
+
+  const dateNavBtn=document.getElementById('date-nav-btn');
+  const navDay=document.getElementById('nav-day');
+  const navYear=document.getElementById('nav-year');
+
+  // Инициализация значений текущей датой
+  navDay.value=today.getDate();
+  navMonth.value=today.getMonth();
+  navYear.value=today.getFullYear();
+
+  // Обработчик кнопки ▶ - переход к дате сразу
+  dateNavBtn.onclick=()=>{
+    const day=parseInt(navDay.value)||1;
+    const month=parseInt(navMonth.value)||0;
+    const year=parseInt(navYear.value)||today.getFullYear();
+    const sel=new Date(year,month,day);
+    centerOnDate(sel);
+  };
+
+  // Клавиатурная доступность для кнопки ▶
+  dateNavBtn.onkeydown=(e)=>{
+    if(e.key==='Enter'||e.key===' '){
+      e.preventDefault();
+      dateNavBtn.click();
+    }
+  };
+
+  // Переход по Enter в полях ввода
+  navDay.onkeydown=(e)=>{if(e.key==='Enter')dateNavBtn.click();};
+  navMonth.onkeydown=(e)=>{if(e.key==='Enter')dateNavBtn.click();};
+  navYear.onkeydown=(e)=>{if(e.key==='Enter')dateNavBtn.click();};
+
   document.getElementById('gonow').onclick=()=>{setDateSelector(today);goNow();};
   document.getElementById('zoomPct').onclick=resetZoom;
   document.getElementById('zoom-in').onclick=()=>zoomStep(1);
@@ -1600,12 +1651,15 @@ function updateHud(){
   }
 })();
 
-resize();
-applyZoom();
-initDateSelector();
-goNow();
-updateHud();
-requestAnimationFrame(loop);
+// ---------- инициализация при загрузке ----------
+(function init(){
+  resize();
+  applyZoom();
+  initDateSelector();
+  goNow();
+  updateHud();
+  requestAnimationFrame(loop);
+})();
 </script>
 </body>
 </html>
