@@ -1554,6 +1554,12 @@ window.addEventListener('keydown',e=>{
   else if(e.key==='ArrowDown'&&state.mode!=='timeline'){state.camY+=.2;requestRender();}
 });
 
+// клавиатурная доступность для селектора даты: Enter в полях вызывает переход
+document.getElementById('selDay').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
+document.getElementById('selMonth').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
+document.getElementById('selYear').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
+document.getElementById('showDate').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();centerOnDate(readDateSelector());}});
+
 function rr(x,y,w,h,r){
   ctx.beginPath();
   if(ctx.roundRect){ctx.roundRect(x,y,w,h,r);return;}
@@ -1584,11 +1590,6 @@ function initDateSelector(){
   document.getElementById('zoom-out').onclick=()=>zoomStep(-1);
   document.getElementById('zoom-in').ondblclick=()=>zoomDbl(1);
   document.getElementById('zoom-out').ondblclick=()=>zoomDbl(-1);
-  // клавиатурная доступность для селектора даты: Enter в полях вызывает переход
-  document.getElementById('selDay').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
-  document.getElementById('selMonth').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
-  document.getElementById('selYear').addEventListener('keydown',e=>{if(e.key==='Enter'){centerOnDate(readDateSelector());}});
-  document.getElementById('showDate').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();centerOnDate(readDateSelector());}});
   const sl=document.getElementById('zoomSlider');
   sl.addEventListener('input',()=>{
     if(sliderLock)return;
