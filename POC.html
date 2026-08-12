@@ -1021,12 +1021,14 @@ function renderRowDays(r,y,lvl){
     ctx.fillText(DWU[dow],x+6+wOrd+wEnd+ctx.measureText(' ').width,y+L.ordY);
     ctx.font=`bold ${24*L.cs}px ui-monospace,monospace`;
     const isToday = sameDay(date, today);
-    // Determine day number color with priority: Today > 1st of month > Highlighted silhouette > Default
+    // Determine day number color with priority: Highlighted date number > Today > 1st of month > Highlighted silhouette > Default
     let dayColor = '#808590'; // Default gray
-    if (isToday) {
+    if (hl.dateNum===date.getDate()) {
+      dayColor = '#ffd24d';
+    } else if (isToday) {
       dayColor = '#ff3333'; // Red for today
     } else if (first) {
-      dayColor = date.getMonth() % 2 === 0 ? '#9664ff' : '#3cdcc8'; // Gradient colors for 1st
+      dayColor = date.getMonth() % 2 === 0 ? '#9664ff' : '#3cdcc8'; // Gradient colors for 1st 
     } else if (hl.hoverSeamLeft !== null && hl.hoverSeamRight !== null && k >= hl.hoverSeamLeft && k <= hl.hoverSeamRight && (date.getFullYear()*12+date.getMonth()) === hl.hoverMonthIdx) {
       dayColor = '#dfe6ef'; // Light gray for highlighted month silhouette
     }
@@ -1506,13 +1508,16 @@ function renderMonthRowRow(r,y,lvl){
     }
     const seamDow=state.firstDayOfWeek==='sun'?5:6;
     if(dow===seamDow){ctx.fillStyle='rgba(122,162,255,0.45)';ctx.fillRect(x+lvl.cellW-3,y,3,lvl.rowH);}
-    ctx.font=`bold ${Math.round(24*numScale)}px ui-monospace,monospace`;
-    // Determine day number color with priority: Today > 1st of month > Default
+    ctx.font=`bold ${Math.round(20*numScale)}px ui-monospace,monospace`;
+    // Determine day number color with priority: Highlighted date number > Today > 1st of month > Highlighted silhouette > Default
     let monthColor = '#dfe6ef'; // Default gray
-    if (sameDay(date, today)) {
+    if (hl.dateNum===date.getDate()) {
+      monthColor = '#ffd24d'; // Yellow foh Highlighted date number
+    } else if (sameDay(date, today)) {
       monthColor = '#ff3333'; // Red for today
     } else if (first) {
       monthColor = date.getMonth() % 2 === 0 ? '#9664ff' : '#3cdcc8'; // Gradient colors for 1st
+    }
     ctx.fillStyle = monthColor;
     ctx.fillText(String(date.getDate()),x+6,y+lvl.rowH*0.6);
   }
