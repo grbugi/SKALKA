@@ -4,71 +4,142 @@
 <meta charset="utf-8">
 <title>SKALKA PoC</title>
 <style>
-  :root { color-scheme: dark; }
+    :root {
+    color-scheme: dark;
+    /* === базовые поверхности === */
+    --bg:                  #0b0e14;  /* фон страницы/холста; текст на плашках событий */
+    --panel-bg:            rgba(13,17,25,0.92); /* подложка HUD-панелей */
+    --chrome:              #0d1119;  /* непрозрачный фон гуттера и шапки */
+    --cell-bg:             #0f141c;  /* фон обычной ячейки */
+    --cell-bg-today:       #101a17;  /* фон ячейки «сегодня» */
+    --cell-bg-first:       #121a28;  /* фон ячейки 1-го числа */
+    --border:              #232b38;  /* рамки панелей; границы ячеек в «часах» */
+    --border-hover:        #3a4a64;  /* рамка кнопки панели при наведении */
+    --grid-line:           #1b222e;  /* линии сетки: границы ячеек и строк (ср. #1c2330/#1a212c) */
+    --input-bg:            #161d29;  /* фон полей ввода */
+    --input-border:        #2a3444;  /* рамка полей ввода */
+    --button-bg:           #1a2332;  /* фон кнопок */
+    --button-bg-hover:     #223047;  /* фон кнопок при наведении */
+    --time-label-bg:       rgba(11,14,20,0.9); /* плашка значения курсора времени */
+
+    /* === текст === */
+    --text:                #dfe6ef;  /* основной цвет текста */
+    --text-soft:           #9fb0c3;  /* приглушённый текст */
+    --text-dim:            #6b7684;  /* тусклый текст */
+    --text-faint:          #4a5563;  /* едва заметный текст */
+    --text-cell:           #8b96a5;  /* номер недели/день недели в ячейке и шапке */
+    --text-weekend:        #a07878;  /* выходные в шапке */
+    --text-daynum:         #808590;  /* число месяца по умолчанию */
+    --text-daynum-today:   #ff3333;  /* число месяца «сегодня» */
+    --text-debug:          #8a9bb0;  /* метки в оверлее отладки */
+
+    /* === акцент === */
+    --accent:              #7aa2ff;  /* основной акцент (кнопки, обводка, текущая неделя) */
+    --accent-hover:        #a8c5ff;  /* акцент при наведении */
+
+    /* === подсветки (hl) === */
+    --seam-line:           rgba(122,162,255,0.45); /* вертикальный шов недели */
+    --month-frame:         rgba(122,162,255,0.5);  /* рамка месяца */
+    --hl-header-hover:     rgba(122,162,255,0.12); /* ховер-заливка в шапке */
+    --hl-gutter-hover:     rgba(122,162,255,0.10); /* ховер-заливка в гуттере */
+    --hl-hover-dow:        rgba(77,208,225,0.07);  /* координатная подсветка дня недели (ховер на ячейке) */
+    --hl-dow:              rgba(77,208,225,0.14);  /* подсветка дня недели (ховер шапки) */
+    --hl-header-dow:       rgba(77,208,225,0.15);  /* подсветка колонки в шапке */
+    --hl-hover-row:        rgba(67,209,124,0.07);  /* подсветка строки при ховере */
+    --hl-week-month:       rgba(67,209,124,0.09);  /* подсветка недели/месяца в ячейке */
+    --hl-gutter-week:      rgba(67,209,124,0.12);  /* подсветка недели/месяца в гуттере */
+    --hl-date:             rgba(255,210,77,0.16);  /* подсветка числа в ячейке */
+    --hl-date-strong:      #ffd24d;  /* яркое число при подсветке */
+    --hl-ord:              rgba(197,138,255,0.14); /* подсветка порядкового номера дня */
+    --hl-ord-strong:       #c58aff;  /* яркий номер порядка */
+    --silhouette-month:    rgba(223,230,239,0.04); /* силуэт месяца между швами */
+    --hl-monthrow-row:     rgba(100,170,255,0.05); /* ховер строки в «месяцах» */
+    --hl-monthrow-week:    rgba(100,170,255,0.07); /* ховер недели в «месяцах» */
+
+    /* === время и месяц === */
+    --now-line:            #ff4d4d;  /* красная полоска «сейчас» */
+    --now-label:           #ff6b6b;  /* метка «● сейчас» в гуттере */
+    --cell-border-today:   #2e5c47;  /* рамка ячейки «сегодня» */
+    --month-label-odd:     #9664ff;  /* 1-е число и название месяца (нечётный) */
+    --month-label-even:    #3cdcc8;  /* 1-е число и название месяца (чётный) */
+    --gradient-odd-rgb:    150,100,255; /* градиент нечётного месяца (RGB-триплет) */
+    --gradient-even-rgb:   60,220,200;  /* градиент чётного месяца (RGB-триплет) */
+    --white-rgb:           255,255,255; /* белый (RGB-триплет для динамического alpha) */
+    --white:               #ffffff;  /* белый контраст: обводка событий, текст плашки времени */
+
+    /* === цвета демо-событий (данные, не UI) === */
+    --event-bkp:           #ff5c5c;
+    --event-scan:          #43d17c;
+    --event-logs:          #4da3ff;
+    --event-redis:         #ffd24d;
+    --event-sync:          #c58aff;
+    --event-sunmon:        #ff9f43;
+    --event-frisun:        #54a0ff;
+  }
   * { box-sizing: border-box; }
-  html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; background:#0b0e14;
-    font:12px/1.45 ui-monospace,"Cascadia Mono",Consolas,monospace; color:#dfe6ef; }
+  html,body { margin:0; height:100%; overflow:hidden; overscroll-behavior:none; background:var(--bg);
+    font:12px/1.45 ui-monospace,"Cascadia Mono",Consolas,monospace; color:var(--text); }
   canvas { display:block; cursor:grab; }
   canvas.drag { cursor:grabbing; }
   #toggleHud { position:fixed; top:12px; right:12px; width:32px; height:32px; z-index:100;
-    background:rgba(13,17,25,.92); border:1px solid #232b38; border-radius:6px;
-    color:#7aa2ff; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  #toggleHud:hover { color:#a8c5ff; border-color:#3a4a64; }
+    background:var(--panel-bg); border:1px solid var(--border); border-radius:6px;
+    color:var(--accent); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  #toggleHud:hover { color:var(--accent-hover); border-color:var(--border-hover); }
   #hud { position:fixed; top:54px; right:12px; width:250px; padding:12px;
-    background:rgba(13,17,25,.92); border:1px solid #232b38; border-radius:8px;
+    background:var(--panel-bg); border:1px solid var(--border); border-radius:8px;
     user-select:none; max-height:calc(100vh - 70px); overflow-y:auto; }
   #hud .brand { font-weight:700; letter-spacing:.12em; }
-  #hud .brand span { color:#6b7684; font-weight:400; letter-spacing:0; }
-  #hud .sub { color:#6b7684; font-size:10px; margin:4px 0 8px; }
-  .fdow-bar { display:flex; gap:6px; align-items:center; margin-bottom:8px; font-size:11px; color:#9fb0c3; }
-  .fdow-bar select { background:#161d29; color:#dfe6ef; border:1px solid #2a3444; border-radius:4px; font:inherit; padding:2px 4px; }
+  #hud .brand span { color:var(--text-dim); font-weight:400; letter-spacing:0; }
+  #hud .sub { color:var(--text-dim); font-size:10px; margin:4px 0 8px; }
+  .fdow-bar { display:flex; gap:6px; align-items:center; margin-bottom:8px; font-size:11px; color:var(--text-soft); }
+  .fdow-bar select { background:var(--input-bg); color:var(--text); border:1px solid var(--input-border); border-radius:4px; font:inherit; padding:2px 4px; }
   .datebar { display:flex; gap:4px; margin-bottom:8px; align-items:center; }
-  .datebar input,.datebar select { background:#161d29; color:#dfe6ef; border:1px solid #2a3444;
+  .datebar input,.datebar select { background:var(--input-bg); color:var(--text); border:1px solid var(--input-border);
     border-radius:4px; font:inherit; padding:3px 4px; }
   .datebar input[type=number]{ width:54px; }
   .datebar select { flex:1; min-width:0; }
-  .datebar button { background:#1a2332; color:#7aa2ff; border:1px solid #2a3444;
+  .datebar button { background:var(--button-bg); color:var(--accent); border:1px solid var(--input-border);
     border-radius:4px; cursor:pointer; font:inherit; padding:3px 8px; }
-  .datebar button:hover { background:#223047; }
-  #anchor { color:#6b7684; font-size:10px; margin-bottom:8px; }
+  .datebar button:hover { background:var(--button-bg-hover); }
+  #anchor { color:var(--text-dim); font-size:10px; margin-bottom:8px; }
   .lg { display:flex; align-items:flex-start; gap:6px; margin:4px 0; }
   .lg .sw { width:10px; height:10px; border-radius:2px; margin-top:2px; flex:none; }
-  .lg small { color:#6b7684; display:block; }
-  .help { margin-top:10px; padding-top:8px; border-top:1px solid #232b38; color:#6b7684; font-size:10px; }
+  .lg small { color:var(--text-dim); display:block; }
+  .help { margin-top:10px; padding-top:8px; border-top:1px solid var(--border); color:var(--text-dim); font-size:10px; }
   #status { position:fixed; left:12px; bottom:12px; max-width:70vw; padding:6px 10px;
-    background:rgba(13,17,25,.92); border:1px solid #232b38; border-radius:6px; color:#9fb0c3;
+    background:var(--panel-bg); border:1px solid var(--border); border-radius:6px; color:var(--text-soft);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #zoom-controls { position:fixed; right:12px; bottom:12px; display:flex; flex-direction:column;
     gap:6px; align-items:flex-end; z-index:100; }
   .nav-row { width:280px; display:flex; align-items:center; gap:6px; }
-  #date-nav-btn { background:#1a2332; color:#7aa2ff; border:1px solid #2a3444;
+  #date-nav-btn { background:var(--button-bg); color:var(--accent); border:1px solid var(--input-border);
     border-radius:4px; cursor:pointer; font:inherit; padding:3px 8px; height:28px;
     display:flex; align-items:center; justify-content:center; min-width:24px; font-size:12px; }
-  #date-nav-btn:hover { background:#223047; }
-  #nav-day, #nav-month, #nav-year { background:#161d29; color:#dfe6ef;
-    border:1px solid #2a3444; border-radius:4px; font:inherit; padding:3px 4px; box-sizing:border-box; }
+  #date-nav-btn:hover { background:var(--button-bg-hover); }
+  #nav-day, #nav-month, #nav-year { background:var(--input-bg); color:var(--text);
+    border:1px solid var(--input-border); border-radius:4px; font:inherit; padding:3px 4px; box-sizing:border-box; }
   #nav-day { width:54px; text-align:center; }
   #nav-month { flex:1; min-width:0; }
   #nav-year { width:60px; text-align:center; }
   #zoom-bar { display:flex; align-items:center; gap:6px; width:280px; height:28px; }
-  #zoom-bar button, #zoomPct { height:28px; box-sizing:border-box; background:#1a2332; color:#7aa2ff;
-    border:1px solid #2a3444; border-radius:4px; cursor:pointer; font:inherit; font-size:12px; line-height:1;
+  #zoom-bar button, #zoomPct { height:28px; box-sizing:border-box; background:var(--button-bg); color:var(--accent);
+    border:1px solid var(--input-border); border-radius:4px; cursor:pointer; font:inherit; font-size:12px; line-height:1;
     display:flex; align-items:center; justify-content:center; }
-  #zoom-bar button:hover, #zoomPct:hover { background:#223047; }
+  #zoom-bar button:hover, #zoomPct:hover { background:var(--button-bg-hover); }
   #gonow { flex:1; min-width:100px; justify-content:flex-start; padding-left:10px; }
   #zoom-out, #zoom-in { width:28px; flex:none; padding:0; }
   #zoomPct { width:72px; flex:none; }
   #slider-wrap { width:280px; }
-  #zoomSlider { width:100%; cursor:pointer; accent-color:#7aa2ff; }
-  #slider-labels { display:flex; justify-content:space-between; font-size:9px; color:#6b7684; margin-top:2px; width:280px; }
+  #zoomSlider { width:100%; cursor:pointer; accent-color:var(--accent); }
+  #slider-labels { display:flex; justify-content:space-between; font-size:9px; color:var(--text-dim); margin-top:2px; width:280px; }
   #slider-labels span { flex:1; text-align:center; }
   #debugOverlay { position:fixed; top:12px; left:12px; padding:10px 12px;
-    background:rgba(13,17,25,.92); border:1px solid #232b38; border-radius:6px;
-    font:14px ui-monospace,monospace; color:#9fb0c3; z-index:99; pointer-events:none;
+    background:var(--panel-bg); border:1px solid var(--border); border-radius:6px;
+    font:14px ui-monospace,monospace; color:var(--text-soft); z-index:99; pointer-events:none;
     display:none; line-height:1.6; }
   #debugOverlay .row { display:flex; gap:16px; white-space:nowrap; }
-  #debugOverlay .label { color:#8a9bb0; }
-  #debugOverlay .val { color:#7aa2ff; font-variant-numeric:tabular-nums; }
+  #debugOverlay .label { color:var(--text-debug); }
+  #debugOverlay .val { color:var(--accent); font-variant-numeric:tabular-nums; }
   #debugOverlay.visible { display:block; }
 </style>
 </head>
@@ -120,7 +191,7 @@
   </div>
   <!-- Строка 2: Кнопка Сейчас + масштаб -->
   <div id="zoom-bar">
-    <button id="gonow" title="текущий момент"><span style="color:#ff4d4d">●</span>&nbsp;сейчас</button>
+    <button id="gonow" title="текущий момент"><span style="color:var(--now-line)">●</span>&nbsp;сейчас</button>
     <button id="zoom-out" title="уменьшить (dblclick — к месяцам)">−</button>
     <span id="zoomPct" title="сбросить масштаб" style="font-variant-numeric:tabular-nums;">100%</span>
     <button id="zoom-in" title="увеличить (dblclick — к часам)">+</button>
@@ -150,6 +221,65 @@ function resize(){
 }
 window.addEventListener('resize',resize);
 
+
+// ---------- палитра ----------
+// Все цвета проекта объявлены как CSS-переменные в :root (<style>).
+// Canvas 2D не умеет читать var(), поэтому значения берутся через getComputedStyle.
+const cssStyle = getComputedStyle(document.documentElement);
+const cssColor = name => cssStyle.getPropertyValue(name).trim();
+const rgbaOf = (rgb, a) => `rgba(${rgb},${a})`;
+const PAL = {
+  bg:               cssColor('--bg'),
+  chrome:           cssColor('--chrome'),
+  cellBg:           cssColor('--cell-bg'),
+  cellBgToday:      cssColor('--cell-bg-today'),
+  cellBgFirst:      cssColor('--cell-bg-first'),
+  border:           cssColor('--border'),
+  gridLine:         cssColor('--grid-line'),
+  timeLabelBg:      cssColor('--time-label-bg'),
+  text:             cssColor('--text'),
+  textSoft:         cssColor('--text-soft'),
+  textDim:          cssColor('--text-dim'),
+  textFaint:        cssColor('--text-faint'),
+  textCell:         cssColor('--text-cell'),
+  textWeekend:      cssColor('--text-weekend'),
+  textDaynum:       cssColor('--text-daynum'),
+  textDaynumToday:  cssColor('--text-daynum-today'),
+  accent:           cssColor('--accent'),
+  seamLine:         cssColor('--seam-line'),
+  monthFrame:       cssColor('--month-frame'),
+  hlHeaderHover:    cssColor('--hl-header-hover'),
+  hlGutterHover:    cssColor('--hl-gutter-hover'),
+  hlHoverDow:       cssColor('--hl-hover-dow'),
+  hlDow:            cssColor('--hl-dow'),
+  hlHeaderDow:      cssColor('--hl-header-dow'),
+  hlHoverRow:       cssColor('--hl-hover-row'),
+  hlWeekMonth:      cssColor('--hl-week-month'),
+  hlGutterWeek:     cssColor('--hl-gutter-week'),
+  hlDate:           cssColor('--hl-date'),
+  hlDateStrong:     cssColor('--hl-date-strong'),
+  hlOrd:            cssColor('--hl-ord'),
+  hlOrdStrong:      cssColor('--hl-ord-strong'),
+  silhouetteMonth:  cssColor('--silhouette-month'),
+  hlMonthrowRow:    cssColor('--hl-monthrow-row'),
+  hlMonthrowWeek:   cssColor('--hl-monthrow-week'),
+  nowLine:          cssColor('--now-line'),
+  nowLabel:         cssColor('--now-label'),
+  cellBorderToday:  cssColor('--cell-border-today'),
+  monthLabelOdd:    cssColor('--month-label-odd'),
+  monthLabelEven:   cssColor('--month-label-even'),
+  gradientOddRgb:   cssColor('--gradient-odd-rgb'),
+  gradientEvenRgb:  cssColor('--gradient-even-rgb'),
+  whiteRgb:         cssColor('--white-rgb'),
+  white:            cssColor('--white'),
+  eventBkp:         cssColor('--event-bkp'),
+  eventScan:        cssColor('--event-scan'),
+  eventLogs:        cssColor('--event-logs'),
+  eventRedis:       cssColor('--event-redis'),
+  eventSync:        cssColor('--event-sync'),
+  eventSunmon:      cssColor('--event-sunmon'),
+  eventFrisun:      cssColor('--event-frisun'),
+};
 // ---------- календарь ----------
 const DAYMS=86400000, EPOCH=new Date(1970,0,1);
 const MF=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
@@ -216,13 +346,13 @@ const anchorWeekStart=startOfWeek(today);
 const FIRSTTIME=new Date(2025,0,1);
 
 const EVENTS=[
-  {id:'bkp',   title:'DB Full Backup',plan:'night-backups',color:'#ff5c5c',type:'daily',       start:23*60+30,dur:120},
-  {id:'scan',  title:'Vuln Scan',     plan:'security',     color:'#43d17c',type:'week-row',    week:2,day:2,start:3*60,dur:90},
-  {id:'logs',  title:'Log Rotation',  plan:'maintenance',  color:'#4da3ff',type:'weekday-order',ord:1,day:0,start:4*60+30,dur:45},
-  {id:'redis', title:'Redis Flush',   plan:'maintenance',  color:'#ffd24d',type:'interval',    n:3,start:2*60,dur:15},
-  {id:'sync',  title:'Config Sync',   plan:'infra',        color:'#c58aff',type:'weekly',      day:4,start:20*60,dur:30},
-  {id:'sunmon',title:'Sun→Mon Night', plan:'night-backups',color:'#ff9f43',type:'weekly',      day:6,start:22*60,dur:480},
-  {id:'frisun',title:'Fri→Sun Long',  plan:'maintenance',  color:'#54a0ff',type:'weekly',      day:4,start:16*60,dur:2640},
+  {id:'bkp',   title:'DB Full Backup',plan:'night-backups',color:PAL.eventBkp,type:'daily',       start:23*60+30,dur:120},
+  {id:'scan',  title:'Vuln Scan',     plan:'security',     color:PAL.eventScan,type:'week-row',    week:2,day:2,start:3*60,dur:90},
+  {id:'logs',  title:'Log Rotation',  plan:'maintenance',  color:PAL.eventLogs,type:'weekday-order',ord:1,day:0,start:4*60+30,dur:45},
+  {id:'redis', title:'Redis Flush',   plan:'maintenance',  color:PAL.eventRedis,type:'interval',    n:3,start:2*60,dur:15},
+  {id:'sync',  title:'Config Sync',   plan:'infra',        color:PAL.eventSync,type:'weekly',      day:4,start:20*60,dur:30},
+  {id:'sunmon',title:'Sun→Mon Night', plan:'night-backups',color:PAL.eventSunmon,type:'weekly',      day:6,start:22*60,dur:480},
+  {id:'frisun',title:'Fri→Sun Long',  plan:'maintenance',  color:PAL.eventFrisun,type:'weekly',      day:4,start:16*60,dur:2640},
 ];
 function occursOn(e,date){
   const y=date.getFullYear(),m=date.getMonth(),d=date.getDate(),dw=dowMon0(date);
@@ -465,11 +595,11 @@ function monthGradientRGBA(date){
   if(monthNum%2===1){
     // нечётные: фиолетовый → прозрачный
     const a=0.10*(1-progress);
-    return `rgba(150,100,255,${a})`;
+    return rgbaOf(PAL.gradientOddRgb,a);
   } else {
     // чётные: зелёный → белый 5%
     const a=0.10+(0.05-0.10)*progress;
-    return `rgba(60,220,200,${a})`;
+    return rgbaOf(PAL.gradientEvenRgb,a);
   }
 }
 function hourLabelConfig(P){
@@ -929,7 +1059,7 @@ function render(){
 
 // ---------- режим КАРТА (дни) ----------
 function renderMap(){
-  ctx.fillStyle='#0b0e14';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=PAL.bg;ctx.fillRect(0,0,W,H);
   const lvl=VIEW;
   computeHover();
   const gridH=H-HEADER,gridW=W-GUTTER;
@@ -939,7 +1069,7 @@ function renderMap(){
   ctx.save();
   ctx.beginPath();ctx.rect(GUTTER,HEADER,gridW,gridH);ctx.clip();
   for(let r=r0;r<=r1;r++){renderRowDays(r,HEADER+(r-state.camY)*lvl.rowH,lvl);}
-  ctx.strokeStyle='#1a212c';
+  ctx.strokeStyle=PAL.gridLine;
   for(let r=r0;r<=r1;r++){const y=HEADER+(r-state.camY)*lvl.rowH;
     ctx.beginPath();ctx.moveTo(GUTTER,y+lvl.rowH+.5);ctx.lineTo(W,y+lvl.rowH+.5);ctx.stroke();}
   drawMonthFrames(r0,r1,lvl);
@@ -949,10 +1079,10 @@ function renderMap(){
   ctx.restore();
   drawTopHeader(lvl);
   drawGutter(r0,r1,lvl);
-  ctx.fillStyle='#0d1119';ctx.fillRect(0,0,GUTTER,HEADER);
-  ctx.fillStyle='#4a5563';ctx.font='9px ui-monospace,monospace';
+  ctx.fillStyle=PAL.chrome;ctx.fillRect(0,0,GUTTER,HEADER);
+  ctx.fillStyle=PAL.textFaint;ctx.font='9px ui-monospace,monospace';
   ctx.fillText('недели ↓',8,HEADER/2+3);
-  ctx.strokeStyle='#232b38';
+  ctx.strokeStyle=PAL.border;
   ctx.beginPath();ctx.moveTo(0,HEADER+.5);ctx.lineTo(W,HEADER+.5);ctx.stroke();
   ctx.beginPath();ctx.moveTo(GUTTER+.5,0);ctx.lineTo(GUTTER+.5,H);ctx.stroke();
 }
@@ -965,80 +1095,80 @@ function renderRowDays(r,y,lvl){
     const x=GUTTER+(k-state.camX)*lvl.cellW;
     const first=date.getDate()===1;
     const ord=Math.floor((date.getDate()-1)/7)+1,dow=dowMon0(date);
-    ctx.fillStyle=first?'#121a28':(sameDay(date,today)?'#101a17':'#0f141c');
+    ctx.fillStyle=first?PAL.cellBgFirst:(sameDay(date,today)?PAL.cellBgToday:PAL.cellBg);
     ctx.fillRect(x,y,lvl.cellW,lvl.rowH);
     const ga=monthGradientRGBA(date);
     ctx.fillStyle=ga;
     ctx.fillRect(x,y,lvl.cellW,lvl.rowH);
     // подсветка координат при наведении (6-9%)
-    if(hl.hoverDow!==null&&dow===hl.hoverDow){ctx.fillStyle='rgba(77,208,225,0.07)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
-    if(isHoverRow){ctx.fillStyle='rgba(67,209,124,0.07)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    if(hl.hoverDow!==null&&dow===hl.hoverDow){ctx.fillStyle=PAL.hlHoverDow;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    if(isHoverRow){ctx.fillStyle=PAL.hlHoverRow;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
     // подсветка силуэта месяца (бледно-белый для дат внутри месяца между швами)
     if(hl.hoverMonthIdx!==null&&hl.hoverSeamLeft!==null&&hl.hoverSeamRight!==null){
       const cellMonthIdx=date.getFullYear()*12+date.getMonth();
       if(cellMonthIdx===hl.hoverMonthIdx){
         // Проверяем, попадает ли ячейка в диапазон из 7 столбцов
         if(k>=hl.hoverSeamLeft&&k<=hl.hoverSeamRight){
-          ctx.fillStyle='rgba(223,230,239,0.04)';  // бледно-белый для силуэта месяца
+          ctx.fillStyle=PAL.silhouetteMonth;  // бледно-белый для силуэта месяца
           ctx.fillRect(x,y,lvl.cellW,lvl.rowH);
         }
       }
     }
     // существующие подсветки
-    if(hl.dow!==null&&dow===hl.dow){ctx.fillStyle='rgba(77,208,225,0.14)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
-    if(hl.dowOrd!==null&&ord===hl.dowOrd.ord&&dow===hl.dowOrd.dow){ctx.fillStyle='rgba(197,138,255,0.14)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
-    if(hl.dateNum!==null&&date.getDate()===hl.dateNum){ctx.fillStyle='rgba(255,210,77,0.16)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
-    if(hl.weekNum!==null&&weekNumberOfMonday(startOfWeekFDOW(date))===hl.weekNum){ctx.fillStyle='rgba(67,209,124,0.09)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
-    if(hl.monthIdx!==null&&(date.getFullYear()*12+date.getMonth())===hl.monthIdx){ctx.fillStyle='rgba(67,209,124,0.09)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
-    ctx.strokeStyle=sameDay(date,today)?'#2e5c47':'#1c2330';
+    if(hl.dow!==null&&dow===hl.dow){ctx.fillStyle=PAL.hlDow;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    if(hl.dowOrd!==null&&ord===hl.dowOrd.ord&&dow===hl.dowOrd.dow){ctx.fillStyle=PAL.hlOrd;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    if(hl.dateNum!==null&&date.getDate()===hl.dateNum){ctx.fillStyle=PAL.hlDate;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    if(hl.weekNum!==null&&weekNumberOfMonday(startOfWeekFDOW(date))===hl.weekNum){ctx.fillStyle=PAL.hlWeekMonth;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    if(hl.monthIdx!==null&&(date.getFullYear()*12+date.getMonth())===hl.monthIdx){ctx.fillStyle=PAL.hlWeekMonth;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    ctx.strokeStyle=sameDay(date,today)?PAL.cellBorderToday:PAL.gridLine;
     ctx.strokeRect(x+.5,y+.5,lvl.cellW-1,lvl.rowH-1);
     if(sameDay(date,today)){
       const nowMin=now.getHours()*60+now.getMinutes();
       const tx=x+(nowMin/1440)*lvl.cellW;
-      ctx.strokeStyle='#ff4d4d';ctx.lineWidth=1.5;
+      ctx.strokeStyle=PAL.nowLine;ctx.lineWidth=1.5;
       ctx.beginPath();ctx.moveTo(tx,y+3);ctx.lineTo(tx,y+lvl.rowH-3);ctx.stroke();
       ctx.lineWidth=1;
     }
     drawHourTicks(x,y,lvl.cellW,lvl.rowH);
     const seamDow=state.firstDayOfWeek==='sun'?5:6;
-    if(dow===seamDow){ctx.fillStyle='rgba(122,162,255,0.45)';ctx.fillRect(x+lvl.cellW-3,y,3,lvl.rowH);}
+    if(dow===seamDow){ctx.fillStyle=PAL.seamLine;ctx.fillRect(x+lvl.cellW-3,y,3,lvl.rowH);}
     ctx.font=`bold ${14*L.cs}px ui-monospace,monospace`;
     const ordTxt=String(ord),endTxt=ORD_END[dow];
     const wOrd=ctx.measureText(ordTxt).width;
     const wEnd=ctx.measureText(endTxt).width*L.endAlpha;
-    ctx.fillStyle='#8b96a5';
+    ctx.fillStyle=PAL.textCell;
     ctx.fillText(ordTxt,x+6,y+L.ordY);
     if(L.endAlpha>0.02){
       ctx.globalAlpha=L.endAlpha;
       ctx.fillText(endTxt,x+6+wOrd,y+L.ordY);
       ctx.globalAlpha=1;
     }
-    ctx.fillStyle=(hl.dowOrd&&ord===hl.dowOrd.ord&&dow===hl.dowOrd.dow)?'#c58aff':'#8b96a5';
+    ctx.fillStyle=(hl.dowOrd&&ord===hl.dowOrd.ord&&dow===hl.dowOrd.dow)?PAL.hlOrdStrong:PAL.textCell;
     // If not dowOrd highlighted, check if in month silhouette
     if (!(hl.dowOrd&&ord===hl.dowOrd.ord&&dow===hl.dowOrd.dow) && hl.hoverSeamLeft !== null && hl.hoverSeamRight !== null && k >= hl.hoverSeamLeft && k <= hl.hoverSeamRight && (date.getFullYear()*12+date.getMonth()) === hl.hoverMonthIdx) {
-      ctx.fillStyle = '#dfe6ef';
+      ctx.fillStyle = PAL.text;
     }
     ctx.fillText(DWU[dow],x+6+wOrd+wEnd+ctx.measureText(' ').width,y+L.ordY);
     ctx.font=`bold ${24*L.cs}px ui-monospace,monospace`;
     const isToday = sameDay(date, today);
     // Determine day number color with priority: Highlighted date number > Today > 1st of month > Highlighted silhouette > Default
-    let dayColor = '#808590'; // Default gray
+    let dayColor = PAL.textDaynum; // Default gray
     if (hl.dateNum===date.getDate()) {
-      dayColor = '#ffd24d';
+      dayColor = PAL.hlDateStrong;
     } else if (isToday) {
-      dayColor = '#ff3333'; // Red for today
+      dayColor = PAL.textDaynumToday; // Red for today
     } else if (first) {
-      dayColor = date.getMonth() % 2 === 0 ? '#9664ff' : '#3cdcc8'; // Gradient colors for 1st 
+      dayColor = date.getMonth() % 2 === 0 ? PAL.monthLabelOdd : PAL.monthLabelEven; // Gradient colors for 1st 
     } else if (hl.hoverSeamLeft !== null && hl.hoverSeamRight !== null && k >= hl.hoverSeamLeft && k <= hl.hoverSeamRight && (date.getFullYear()*12+date.getMonth()) === hl.hoverMonthIdx) {
-      dayColor = '#dfe6ef'; // Light gray for highlighted month silhouette
+      dayColor = PAL.text; // Light gray for highlighted month silhouette
     }
     ctx.fillStyle = dayColor;
     ctx.fillText(String(date.getDate()),x+6,y+L.dateY);
     if(first){
       ctx.font=`${10*L.cs}px ui-monospace,monospace`;
       // Month name color: Today > 1st of month colors
-      let monthColor = date.getMonth() % 2 === 0 ? '#9664ff' : '#3cdcc8';
-      if (isToday) monthColor = '#ff3333';
+      let monthColor = date.getMonth() % 2 === 0 ? PAL.monthLabelOdd : PAL.monthLabelEven;
+      if (isToday) monthColor = PAL.textDaynumToday;
       ctx.fillStyle = monthColor;
       ctx.fillText(MF[date.getMonth()],x+6,y+L.dateY+16*L.cs);
     }
@@ -1054,9 +1184,9 @@ function drawDayEvents(r,y,lvl){
     ctx.globalAlpha=isHl?1:0.92;
     ctx.fillStyle=b.e.color;
     rr(b.x0,b.y0,Math.max(b.x1-b.x0,2),b.y1-b.y0,3*cs);ctx.fill();
-    if(isHl){ctx.strokeStyle='#fff';ctx.lineWidth=1.5;rr(b.x0,b.y0,Math.max(b.x1-b.x0,2),b.y1-b.y0,3*cs);ctx.stroke();ctx.lineWidth=1;}
+    if(isHl){ctx.strokeStyle=PAL.white;ctx.lineWidth=1.5;rr(b.x0,b.y0,Math.max(b.x1-b.x0,2),b.y1-b.y0,3*cs);ctx.stroke();ctx.lineWidth=1;}
     ctx.globalAlpha=1;
-    if(b.x1-b.x0>46){ctx.fillStyle='#0b0e14';ctx.font=`${9*cs}px ui-monospace,monospace`;ctx.fillText(b.e.title,b.x0+4,b.y0+b.laneH*0.75);}
+    if(b.x1-b.x0>46){ctx.fillStyle=PAL.bg;ctx.font=`${9*cs}px ui-monospace,monospace`;ctx.fillText(b.e.title,b.x0+4,b.y0+b.laneH*0.75);}
   }
 }
 function drawHourTicks(x,y,cw,ch){
@@ -1065,13 +1195,13 @@ function drawHourTicks(x,y,cw,ch){
   const largeA=clamp((Z-0.25)/0.05,0,1);
   if(largeA<=0)return;
   if(P>=450){
-    ctx.strokeStyle=`rgba(255,255,255,${0.08*largeA})`;
+    ctx.strokeStyle=rgbaOf(PAL.whiteRgb,0.08*largeA);
     for(let q=1;q<96;q++){if(q%4===0||q%2===0)continue;
       const tx=x+(q/96)*cw;
       ctx.beginPath();ctx.moveTo(tx,baseY);ctx.lineTo(tx,baseY-4);ctx.stroke();}
   }
   if(P>=350){
-    ctx.strokeStyle=`rgba(255,255,255,${0.15*largeA})`;
+    ctx.strokeStyle=rgbaOf(PAL.whiteRgb,0.15*largeA);
     for(let h=0;h<24;h++){
       const tx=x+((h+0.5)/24)*cw;
       ctx.beginPath();ctx.moveTo(tx,baseY);ctx.lineTo(tx,baseY-6);ctx.stroke();}
@@ -1085,13 +1215,13 @@ function drawHourTicks(x,y,cw,ch){
       if(a<=0)continue;
       const tx=x+(h/24)*cw;
       const th=large?10:5;
-      ctx.strokeStyle=`rgba(255,255,255,${a})`;
+      ctx.strokeStyle=rgbaOf(PAL.whiteRgb,a);
       ctx.beginPath();ctx.moveTo(tx,baseY);ctx.lineTo(tx,baseY-th);ctx.stroke();
       if(cfg){
         const isLabeled=cfg.labels==='all'?(h>=1&&h<=23):cfg.labels.has(h);
         if(isLabeled){
           const isBold=cfg.bold.has(h);
-          ctx.fillStyle=isBold?`rgba(255,255,255,${0.8*largeA})`:`rgba(255,255,255,${0.45*largeA})`;
+          ctx.fillStyle=isBold?rgbaOf(PAL.whiteRgb,0.8*largeA):rgbaOf(PAL.whiteRgb,0.45*largeA);
           ctx.font=(isBold?'bold ':'')+'8px ui-monospace,monospace';
           ctx.textAlign='center';
           ctx.fillText(String(h),tx,labelY);
@@ -1102,7 +1232,7 @@ function drawHourTicks(x,y,cw,ch){
   }
 }
 function drawMonthFrames(r0,r1,lvl){
-  ctx.strokeStyle='rgba(122,162,255,0.5)';ctx.lineWidth=1.5;
+  ctx.strokeStyle=PAL.monthFrame;ctx.lineWidth=1.5;
   const k0=Math.floor(state.camX)-1,k1=Math.ceil(state.camX+(W-GUTTER)/lvl.cellW)+1;
   for(let r=r0;r<=r1;r++){
     for(let k=k0;k<=k1;k++){
@@ -1157,7 +1287,7 @@ function drawMonthWatermarks(r0,r1,lvl){
     if(cand.length){
       let minDist=Infinity;
       for(const cd of cand)if(cd.dist<minDist)minDist=cd.dist;
-      ctx.fillStyle='rgba(255,255,255,0.4)';
+      ctx.fillStyle=rgbaOf(PAL.whiteRgb,0.4);
       if(minDist<0.5){
         for(const cd of cand){
           if(cd.dist<=minDist+0.01){
@@ -1202,11 +1332,11 @@ function drawTimeLabel(x,y,mins){
   ctx.font='10px ui-monospace,monospace';
   const w=ctx.measureText(txt).width+10;
   const bx=Math.max(GUTTER+2,Math.min(x-w/2,W-w-2));
-  ctx.fillStyle='rgba(11,14,20,0.9)';
+  ctx.fillStyle=PAL.timeLabelBg;
   rr(bx,y-9,w,15,3);ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,0.35)';
+  ctx.strokeStyle=rgbaOf(PAL.whiteRgb,0.35);
   rr(bx+.5,y-8.5,w-1,14,3);ctx.stroke();
-  ctx.fillStyle='#fff';
+  ctx.fillStyle=PAL.white;
   ctx.textAlign='center';
   ctx.fillText(txt,bx+w/2,y+2.5);
   ctx.textAlign='left';
@@ -1225,11 +1355,11 @@ function drawTimeCursor(){
     const raw=((mx-colX)/cw)*1440;
     const s=snapTime(raw,eventBounds(addDays(anchorWeekStart,7*r+k)),cw,prec);
     const lx=colX+(s.line/1440)*cw;
-    ctx.strokeStyle='rgba(255,255,255,0.5)';
+    ctx.strokeStyle=rgbaOf(PAL.whiteRgb,0.5);
     ctx.beginPath();ctx.moveTo(lx+.5,y);ctx.lineTo(lx+.5,y+ch);ctx.stroke();
     if(showLabel)drawTimeLabel(lx,y+82,s.label);
   } else if(hoverRegion==='header'){
-    ctx.strokeStyle='rgba(255,255,255,0.5)';
+    ctx.strokeStyle=rgbaOf(PAL.whiteRgb,0.5);
     ctx.beginPath();ctx.moveTo(mx+.5,HEADER);ctx.lineTo(mx+.5,H);ctx.stroke();
     const k=Math.floor(state.camX+(mx-GUTTER)/cw);
     const colX=GUTTER+(k-state.camX)*cw;
@@ -1241,12 +1371,12 @@ function drawHoverOutline(lvl){
   if(hoverRegion!=='grid'||!hoverCell)return;
   const{r,k}=hoverCell;
   const x=GUTTER+(k-state.camX)*lvl.cellW,y=HEADER+(r-state.camY)*lvl.rowH;
-  ctx.strokeStyle='#7aa2ff';ctx.lineWidth=1.5;
+  ctx.strokeStyle=PAL.accent;ctx.lineWidth=1.5;
   ctx.strokeRect(x+1,y+1,lvl.cellW-2,lvl.rowH-2);
   ctx.lineWidth=1;
 }
 function drawTopHeader(lvl){
-  ctx.fillStyle='#0d1119';ctx.fillRect(GUTTER,0,W-GUTTER,HEADER);
+  ctx.fillStyle=PAL.chrome;ctx.fillRect(GUTTER,0,W-GUTTER,HEADER);
   ctx.save();
   ctx.beginPath();ctx.rect(GUTTER,0,W-GUTTER,HEADER);ctx.clip();
   const k0=Math.floor(state.camX)-1,k1=Math.ceil(state.camX+(W-GUTTER)/lvl.cellW)+1;
@@ -1257,21 +1387,21 @@ function drawTopHeader(lvl){
     else dow=((k%7)+7)%7;
     const isHover=(hoverRegion==='header'&&hoverHeaderK===k);
     // подсветка координат в шапке при наведении на ячейку (почти как при наведении на шапку)
-    if(hl.hoverDow!==null&&dow===hl.hoverDow){ctx.fillStyle='rgba(77,208,225,0.15)';ctx.fillRect(x,0,lvl.cellW,HEADER);}
-    if(hl.dow===dow){ctx.fillStyle='rgba(77,208,225,0.15)';ctx.fillRect(x,0,lvl.cellW,HEADER);}
-    if(isHover){ctx.fillStyle='rgba(122,162,255,0.12)';ctx.fillRect(x,0,lvl.cellW,HEADER);}
-    ctx.fillStyle=isHover?'#7aa2ff':(dow>=5?'#a07878':'#8b96a5');
+    if(hl.hoverDow!==null&&dow===hl.hoverDow){ctx.fillStyle=PAL.hlHeaderDow;ctx.fillRect(x,0,lvl.cellW,HEADER);}
+    if(hl.dow===dow){ctx.fillStyle=PAL.hlHeaderDow;ctx.fillRect(x,0,lvl.cellW,HEADER);}
+    if(isHover){ctx.fillStyle=PAL.hlHeaderHover;ctx.fillRect(x,0,lvl.cellW,HEADER);}
+    ctx.fillStyle=isHover?PAL.accent:(dow>=5?PAL.textWeekend:PAL.textCell);
     ctx.font=(isHover?'bold ':'')+'12px ui-monospace,monospace';
     ctx.textAlign='center';
     ctx.fillText(DW[dow],x+lvl.cellW/2,HEADER/2+4);
     ctx.textAlign='left';
-    ctx.strokeStyle='#1c2330';
+    ctx.strokeStyle=PAL.gridLine;
     ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,HEADER);ctx.stroke();
   }
   ctx.restore();
 }
 function drawGutter(r0,r1,lvl){
-  ctx.fillStyle='#0d1119';ctx.fillRect(0,HEADER,GUTTER,H-HEADER);
+  ctx.fillStyle=PAL.chrome;ctx.fillRect(0,HEADER,GUTTER,H-HEADER);
   ctx.save();
   ctx.beginPath();ctx.rect(0,HEADER,GUTTER,H-HEADER);ctx.clip();
   for(let r=r0;r<=r1;r++){
@@ -1281,17 +1411,17 @@ function drawGutter(r0,r1,lvl){
     const isHover=(hoverRegion==='gutter'&&hoverGutterR===r);
     const isCur=today>=wm&&today<addDays(wm,7);
     // подсветка координат в гуттере при наведении на ячейку (почти как при наведении на гуттер)
-    if(hl.hoverWeekNum!==null&&wn===hl.hoverWeekNum){ctx.fillStyle='rgba(67,209,124,0.12)';ctx.fillRect(0,y,GUTTER,lvl.rowH);}
-    if(hl.weekNum!==null&&wn===hl.weekNum){ctx.fillStyle='rgba(67,209,124,0.12)';ctx.fillRect(0,y,GUTTER,lvl.rowH);}
-    if(isHover){ctx.fillStyle='rgba(122,162,255,0.10)';ctx.fillRect(0,y,GUTTER,lvl.rowH);}
+    if(hl.hoverWeekNum!==null&&wn===hl.hoverWeekNum){ctx.fillStyle=PAL.hlGutterWeek;ctx.fillRect(0,y,GUTTER,lvl.rowH);}
+    if(hl.weekNum!==null&&wn===hl.weekNum){ctx.fillStyle=PAL.hlGutterWeek;ctx.fillRect(0,y,GUTTER,lvl.rowH);}
+    if(isHover){ctx.fillStyle=PAL.hlGutterHover;ctx.fillRect(0,y,GUTTER,lvl.rowH);}
     const lbl=buildWeekLabel(wm);
-    ctx.fillStyle=isCur?'#7aa2ff':(isHover?'#dfe6ef':'#9fb0c3');
+    ctx.fillStyle=isCur?PAL.accent:(isHover?PAL.text:PAL.textSoft);
     ctx.font=(isCur?'bold ':'')+'11px ui-monospace,monospace';
     ctx.fillText(lbl.line1,8,y+16,GUTTER-14);
-    ctx.fillStyle='#6b7684';ctx.font='10px ui-monospace,monospace';
+    ctx.fillStyle=PAL.textDim;ctx.font='10px ui-monospace,monospace';
     ctx.fillText(lbl.line2,8,y+30,GUTTER-14);
-    if(isCur){ctx.fillStyle='#ff6b6b';ctx.font='9px ui-monospace,monospace';ctx.fillText('● сейчас',8,y+lvl.rowH-6);}
-    ctx.strokeStyle='#1a212c';
+    if(isCur){ctx.fillStyle=PAL.nowLabel;ctx.font='9px ui-monospace,monospace';ctx.fillText('● сейчас',8,y+lvl.rowH-6);}
+    ctx.strokeStyle=PAL.gridLine;
     ctx.beginPath();ctx.moveTo(0,y+lvl.rowH+.5);ctx.lineTo(GUTTER,y+lvl.rowH+.5);ctx.stroke();
   }
   ctx.restore();
@@ -1299,7 +1429,7 @@ function drawGutter(r0,r1,lvl){
 
 // ---------- режим ЧАСЫ (таймлайн) ----------
 function renderTimeline(){
-  ctx.fillStyle='#0b0e14';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=PAL.bg;ctx.fillRect(0,0,W,H);
   computeHover();
   const r=state.activeRow;
   const ch=VIEW.rowH,y=(H-ch)/2;
@@ -1320,7 +1450,7 @@ function renderTimeline(){
   drawNowLineTimeline(r,y,lvl.cellW,ch);
   if(hoverRegion==='grid'&&hoverCell){
     const hx=(hoverCell.k-state.camX)*lvl.cellW;
-    ctx.strokeStyle='#7aa2ff';ctx.lineWidth=1.5;
+    ctx.strokeStyle=PAL.accent;ctx.lineWidth=1.5;
     ctx.strokeRect(hx+1,y+1,lvl.cellW-2,ch-2);
     ctx.lineWidth=1;
   }
@@ -1328,12 +1458,12 @@ function renderTimeline(){
 }
 function renderTimelineDayCell(date,x,y,cw,ch){
   const first=date.getDate()===1;
-  ctx.fillStyle=first?'#121a28':'#0f141c';
+  ctx.fillStyle=first?PAL.cellBgFirst:PAL.cellBg;
   ctx.fillRect(x,y,cw,ch);
   const ga=monthGradientRGBA(date);
   ctx.fillStyle=ga;
   ctx.fillRect(x,y,cw,ch);
-  ctx.strokeStyle='#232b38';
+  ctx.strokeStyle=PAL.border;
   ctx.strokeRect(x+.5,y+.5,cw-1,ch-1);
   const dw=dowMon0(date);
   const ord=Math.floor((date.getDate()-1)/7)+1;
@@ -1350,11 +1480,11 @@ function renderTimelineDayCell(date,x,y,cw,ch){
   let textX=x+8;
   textX=Math.max(textX,8);
   textX=Math.min(textX,x+cw-maxTW-8);
-  ctx.fillStyle=first?'#7aa2ff':'#dfe6ef';
+  ctx.fillStyle=first?PAL.accent:PAL.text;
   ctx.font='bold 16px ui-monospace,monospace';
   ctx.fillText(line1,textX,y+24);
   ctx.font='14px ui-monospace,monospace';
-  ctx.fillStyle='#9fb0c3';
+  ctx.fillStyle=PAL.textSoft;
   ctx.fillText(line2,textX,y+46);
 }
 function renderTimelineEvents(){
@@ -1368,13 +1498,13 @@ function renderTimelineEvents(){
     rr(b.x0,b.y0,Math.max(b.x1-b.x0,2),b.y1-b.y0,3);
     ctx.fill();
     if(isHl){
-      ctx.strokeStyle='#fff';ctx.lineWidth=1.5;
+      ctx.strokeStyle=PAL.white;ctx.lineWidth=1.5;
       rr(b.x0,b.y0,Math.max(b.x1-b.x0,2),b.y1-b.y0,3);
       ctx.stroke();ctx.lineWidth=1;
     }
     ctx.globalAlpha=1;
     if(b.x1-b.x0>44){
-      ctx.fillStyle='#0b0e14';
+      ctx.fillStyle=PAL.bg;
       ctx.font='9px ui-monospace,monospace';
       ctx.fillText(b.e.title,b.x0+4,b.y0+(b.y1-b.y0)*0.7);
     }
@@ -1387,9 +1517,9 @@ function renderTimelineDayTicks(x,y,cw,ch){
   ctx.textAlign='center';
   for(let h=0;h<24;h++){
     const tx=x+(h/24)*cw;
-    ctx.strokeStyle='rgba(255,255,255,0.18)';
+    ctx.strokeStyle=rgbaOf(PAL.whiteRgb,0.18);
     ctx.beginPath();ctx.moveTo(tx,y+60);ctx.lineTo(tx,baseY);ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,0.55)';
+    ctx.fillStyle=rgbaOf(PAL.whiteRgb,0.55);
     ctx.font='bold 11px ui-monospace,monospace';
     ctx.fillText(String(h),tx,labelY);
   }
@@ -1401,9 +1531,9 @@ function renderTimelineDayTicks(x,y,cw,ch){
       const min=i*step;
       if(min%60===0)continue;
       const tx=x+(min/1440)*cw;
-      ctx.strokeStyle='rgba(255,255,255,0.08)';
+      ctx.strokeStyle=rgbaOf(PAL.whiteRgb,0.08);
       ctx.beginPath();ctx.moveTo(tx,y+60);ctx.lineTo(tx,baseY);ctx.stroke();
-      ctx.fillStyle='rgba(255,255,255,0.4)';
+      ctx.fillStyle=rgbaOf(PAL.whiteRgb,0.4);
       ctx.font='9px ui-monospace,monospace';
       ctx.fillText(pad2(Math.floor(min/60))+':'+pad2(min%60),tx,labelY);
     }
@@ -1418,7 +1548,7 @@ function drawNowLineTimeline(r,y,cw,ch){
   const nowMin=now.getHours()*60+now.getMinutes();
   const x=(k+nowMin/1440-state.camX)*cw;
   if(x<0||x>W)return;
-  ctx.strokeStyle='#ff4d4d';
+  ctx.strokeStyle=PAL.nowLine;
   ctx.lineWidth=1.5;
   ctx.beginPath();ctx.moveTo(x,y+3);ctx.lineTo(x,y+ch-3);ctx.stroke();
   ctx.lineWidth=1;
@@ -1432,14 +1562,14 @@ function drawTimeCursorTimeline(){
   const raw=((mx-colX)/cw)*1440;
   const s=snapTime(raw,eventBounds(addDays(anchorWeekStart,7*state.activeRow+k)),cw,prec);
   const lx=colX+(s.line/1440)*cw;
-  ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=1;
+  ctx.strokeStyle=rgbaOf(PAL.whiteRgb,0.5);ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(lx+.5,y);ctx.lineTo(lx+.5,y+ch);ctx.stroke();
   if(state.zoom>=0.5)drawTimeLabel(lx,y+ch/2,s.label);
 }
 
 // ---------- режим МЕСЯЦЫ ----------
 function renderMonthRow(){
-  ctx.fillStyle='#0b0e14';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=PAL.bg;ctx.fillRect(0,0,W,H);
   const lvl=VIEW;
   computeHover();
   const gridH=H-HEADER,gridW=W-GUTTER;
@@ -1451,7 +1581,7 @@ function renderMonthRow(){
   for(let r=r0;r<=r1;r++){
     renderMonthRowRow(r,HEADER+(r-state.camY)*lvl.rowH,lvl);
   }
-  ctx.strokeStyle='#1a212c';
+  ctx.strokeStyle=PAL.gridLine;
   for(let r=r0;r<=r1;r++){
     const y=HEADER+(r-state.camY)*lvl.rowH;
     ctx.beginPath();ctx.moveTo(GUTTER,y+lvl.rowH+.5);ctx.lineTo(W,y+lvl.rowH+.5);ctx.stroke();
@@ -1461,10 +1591,10 @@ function renderMonthRow(){
   ctx.restore();
   drawTopHeader(lvl);
   drawMonthRowGutter(r0,r1,lvl);
-  ctx.fillStyle='#0d1119';ctx.fillRect(0,0,GUTTER,HEADER);
-  ctx.fillStyle='#4a5563';ctx.font='9px ui-monospace,monospace';
+  ctx.fillStyle=PAL.chrome;ctx.fillRect(0,0,GUTTER,HEADER);
+  ctx.fillStyle=PAL.textFaint;ctx.font='9px ui-monospace,monospace';
   ctx.fillText('месяцы ↓',8,HEADER/2+3);
-  ctx.strokeStyle='#232b38';
+  ctx.strokeStyle=PAL.border;
   ctx.beginPath();ctx.moveTo(0,HEADER+.5);ctx.lineTo(W,HEADER+.5);ctx.stroke();
   ctx.beginPath();ctx.moveTo(GUTTER+.5,0);ctx.lineTo(GUTTER+.5,H);ctx.stroke();
 }
@@ -1481,42 +1611,42 @@ function renderMonthRowRow(r,y,lvl){
     const x=GUTTER+(k-state.camX)*lvl.cellW;
     const first=date.getDate()===1;
     const dow=dowMon0(date);
-    ctx.fillStyle=first?'#121a28':(sameDay(date,today)?'#101a17':'#0f141c');
+    ctx.fillStyle=first?PAL.cellBgFirst:(sameDay(date,today)?PAL.cellBgToday:PAL.cellBg);
     ctx.fillRect(x,y,lvl.cellW,lvl.rowH);
     const ga=monthGradientRGBA(date);
     ctx.fillStyle=ga;
     ctx.fillRect(x,y,lvl.cellW,lvl.rowH);
-    if(isHoverRow){ctx.fillStyle='rgba(100,170,255,0.05)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    if(isHoverRow){ctx.fillStyle=PAL.hlMonthrowRow;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
     if(hl.hoverMonthIdx!==null&&hl.hoverMonthWeekStart!==null&&(date.getFullYear()*12+date.getMonth())===hl.hoverMonthIdx){
       const cellWeekStart=startOfWeekFDOW(date);
       if(sameDay(cellWeekStart,hl.hoverMonthWeekStart)){
-        ctx.fillStyle='rgba(100,170,255,0.07)';
+        ctx.fillStyle=PAL.hlMonthrowWeek;
         ctx.fillRect(x,y,lvl.cellW,lvl.rowH);
       }
     }
-    if(hl.dow!==null&&dow===hl.dow){ctx.fillStyle='rgba(77,208,225,0.14)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
-    if(hl.dateNum!==null&&date.getDate()===hl.dateNum){ctx.fillStyle='rgba(255,210,77,0.16)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
-    if(hl.monthIdx!==null&&(date.getFullYear()*12+date.getMonth())===hl.monthIdx){ctx.fillStyle='rgba(67,209,124,0.09)';ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
-    ctx.strokeStyle=sameDay(date,today)?'#2e5c47':'#1c2330';
+    if(hl.dow!==null&&dow===hl.dow){ctx.fillStyle=PAL.hlDow;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    if(hl.dateNum!==null&&date.getDate()===hl.dateNum){ctx.fillStyle=PAL.hlDate;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    if(hl.monthIdx!==null&&(date.getFullYear()*12+date.getMonth())===hl.monthIdx){ctx.fillStyle=PAL.hlWeekMonth;ctx.fillRect(x,y,lvl.cellW,lvl.rowH);}
+    ctx.strokeStyle=sameDay(date,today)?PAL.cellBorderToday:PAL.gridLine;
     ctx.strokeRect(x+.5,y+.5,lvl.cellW-1,lvl.rowH-1);
     if(sameDay(date,today)){
       const nowMin=now.getHours()*60+now.getMinutes();
       const tx=x+(nowMin/1440)*lvl.cellW;
-      ctx.strokeStyle='#ff4d4d';ctx.lineWidth=1.5;
+      ctx.strokeStyle=PAL.nowLine;ctx.lineWidth=1.5;
       ctx.beginPath();ctx.moveTo(tx,y+3);ctx.lineTo(tx,y+lvl.rowH-3);ctx.stroke();
       ctx.lineWidth=1;
     }
     const seamDow=state.firstDayOfWeek==='sun'?5:6;
-    if(dow===seamDow){ctx.fillStyle='rgba(122,162,255,0.45)';ctx.fillRect(x+lvl.cellW-3,y,3,lvl.rowH);}
+    if(dow===seamDow){ctx.fillStyle=PAL.seamLine;ctx.fillRect(x+lvl.cellW-3,y,3,lvl.rowH);}
     ctx.font=`bold ${Math.round(20*numScale)}px ui-monospace,monospace`;
     // Determine day number color with priority: Highlighted date number > Today > 1st of month > Highlighted silhouette > Default
-    let monthColor = '#dfe6ef'; // Default gray
+    let monthColor = PAL.text; // Default gray
     if (hl.dateNum===date.getDate()) {
-      monthColor = '#ffd24d'; // Yellow foh Highlighted date number
+      monthColor = PAL.hlDateStrong; // Yellow foh Highlighted date number
     } else if (sameDay(date, today)) {
-      monthColor = '#ff3333'; // Red for today
+      monthColor = PAL.textDaynumToday; // Red for today
     } else if (first) {
-      monthColor = date.getMonth() % 2 === 0 ? '#9664ff' : '#3cdcc8'; // Gradient colors for 1st
+      monthColor = date.getMonth() % 2 === 0 ? PAL.monthLabelOdd : PAL.monthLabelEven; // Gradient colors for 1st
     }
     ctx.fillStyle = monthColor;
     ctx.fillText(String(date.getDate()),x+6,y+lvl.rowH*0.6);
@@ -1530,7 +1660,7 @@ function renderMonthRowRow(r,y,lvl){
     rr(b.x0,b.y0,Math.max(b.x1-b.x0,2),b.y1-b.y0,2);
     ctx.fill();
     if(isHl){
-      ctx.strokeStyle='#fff';ctx.lineWidth=1.5;
+      ctx.strokeStyle=PAL.white;ctx.lineWidth=1.5;
       rr(b.x0,b.y0,Math.max(b.x1-b.x0,2),b.y1-b.y0,2);
       ctx.stroke();ctx.lineWidth=1;
     }
@@ -1538,7 +1668,7 @@ function renderMonthRowRow(r,y,lvl){
   }
 }
 function drawMonthRowFrames(r0,r1,lvl){
-  ctx.strokeStyle='rgba(122,162,255,0.5)';ctx.lineWidth=1.5;
+  ctx.strokeStyle=PAL.monthFrame;ctx.lineWidth=1.5;
   const k0=Math.floor(state.camX)-1,k1=Math.ceil(state.camX+(W-GUTTER)/lvl.cellW)+1;
   for(let r=r0;r<=r1;r++){
     const mi=monthIdxForMonthrowRow(r);
@@ -1556,7 +1686,7 @@ function drawMonthRowFrames(r0,r1,lvl){
   ctx.lineWidth=1;
 }
 function drawMonthRowGutter(r0,r1,lvl){
-  ctx.fillStyle='#0d1119';ctx.fillRect(0,HEADER,GUTTER,H-HEADER);
+  ctx.fillStyle=PAL.chrome;ctx.fillRect(0,HEADER,GUTTER,H-HEADER);
   ctx.save();
   ctx.beginPath();ctx.rect(0,HEADER,GUTTER,H-HEADER);ctx.clip();
   for(let r=r0;r<=r1;r++){
@@ -1565,14 +1695,14 @@ function drawMonthRowGutter(r0,r1,lvl){
     const{y:yy,m:mm}=monthIdxToYM(gutIdx);
     const isHover=(hoverRegion==='gutter'&&hoverGutterR===r);
     const isCur=(today.getFullYear()===yy&&today.getMonth()===mm);
-    if(hl.hoverMonthIdx!==null&&gutIdx===hl.hoverMonthIdx){ctx.fillStyle='rgba(100,170,255,0.05)';ctx.fillRect(0,y,GUTTER,lvl.rowH);}
-    if(hl.monthIdx!==null&&gutIdx===hl.monthIdx){ctx.fillStyle='rgba(67,209,124,0.12)';ctx.fillRect(0,y,GUTTER,lvl.rowH);}
-    if(isHover){ctx.fillStyle='rgba(122,162,255,0.10)';ctx.fillRect(0,y,GUTTER,lvl.rowH);}
-    ctx.fillStyle=isCur?'#7aa2ff':(isHover?'#dfe6ef':'#9fb0c3');
+    if(hl.hoverMonthIdx!==null&&gutIdx===hl.hoverMonthIdx){ctx.fillStyle=PAL.hlMonthrowRow;ctx.fillRect(0,y,GUTTER,lvl.rowH);}
+    if(hl.monthIdx!==null&&gutIdx===hl.monthIdx){ctx.fillStyle=PAL.hlGutterWeek;ctx.fillRect(0,y,GUTTER,lvl.rowH);}
+    if(isHover){ctx.fillStyle=PAL.hlGutterHover;ctx.fillRect(0,y,GUTTER,lvl.rowH);}
+    ctx.fillStyle=isCur?PAL.accent:(isHover?PAL.text:PAL.textSoft);
     ctx.font=(isCur?'bold ':'')+'11px ui-monospace,monospace';
     ctx.fillText(MF[mm]+' '+yy,8,y+16,GUTTER-14);
-    if(isCur){ctx.fillStyle='#ff6b6b';ctx.font='9px ui-monospace,monospace';ctx.fillText('● сейчас',8,y+lvl.rowH-6);}
-    ctx.strokeStyle='#1a212c';
+    if(isCur){ctx.fillStyle=PAL.nowLabel;ctx.font='9px ui-monospace,monospace';ctx.fillText('● сейчас',8,y+lvl.rowH-6);}
+    ctx.strokeStyle=PAL.gridLine;
     ctx.beginPath();ctx.moveTo(0,y+lvl.rowH+.5);ctx.lineTo(GUTTER,y+lvl.rowH+.5);ctx.stroke();
   }
   ctx.restore();
@@ -1766,7 +1896,7 @@ function updateHud(){
     const debugHint=document.createElement('div');
     debugHint.className='debug-hint';
     debugHint.style.marginTop='6px';
-    debugHint.style.color='#4a5563';
+    debugHint.style.color='var(--text-faint)';
     debugHint.textContent='F2 — оверлей отладки';
     helpEl.appendChild(debugHint);
   }
@@ -1776,7 +1906,7 @@ function updateHud(){
   for(const e of EVENTS){
     const d=document.createElement('div');d.className='lg';
     d.innerHTML=`<div class="sw" style="background:${e.color}"></div>
-      <div><div>${e.title} <small style="display:inline;color:#4a5563">· ${e.plan}</small></div>
+      <div><div>${e.title} <small style="display:inline;color:var(--text-faint)">· ${e.plan}</small></div>
       <small>${describe(e)}</small></div>`;
     el.appendChild(d);
   }
