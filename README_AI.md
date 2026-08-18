@@ -39,7 +39,7 @@ Time flows **linearly** (it moves forward), but its measurement and structuring 
 
 ## 4. Current PoC Implementation
 
-The PoC is a single-file application (`PoC.html`). 
+The PoC lives in the `PoC/` folder as a modular single-page application. 
 **Implemented:**
 - 3 views with smooth transitions and 3-scroll barriers.
 - Week seams (Sun→Mon or Sat→Sun based on user toggle, default is Mon).
@@ -151,7 +151,7 @@ Welcome **only** when they clarify genuinely complex low-level mechanisms. Do no
 
 | # | Prohibition | Reason |
 | :--- | :--- | :--- |
-| 1 | Modify files other than `PoC.html` | PoC phase restricts changes to a single file until "Interactive elements" milestone. |
+| 1 | Revert the PoC back to a single file | The PoC is intentionally split into modules under `PoC/`. |
 | 2 | Introduce Docker, Caddy, OAuth2, reverse proxies | Self-hosted/enterprise tooling begins ONLY after mobile apps are shipped. |
 | 3 | Store recurring occurrences in DB | Compute them on-the-fly from template + `starts_at` + `repeat_until`. |
 | 4 | Use English-first UI strings | Russian is the primary locale. |
@@ -180,12 +180,25 @@ Welcome **only** when they clarify genuinely complex low-level mechanisms. Do no
 ## 12. File Structure
 
 ### Current (Active)
-| File | Role |
+| File / Folder | Role |
 | :--- | :--- |
 | `README.md` | Human-facing overview |
 | `README_AI.md` | This file |
 | `LICENSE` | AGPL-3.0 |
-| `PoC.html` | **Active development target** (HTML + CSS + JS) |
+| `PoC/` | **Active development target** — modular single-page PoC |
+| `PoC/index.html` | Entry point (HTML structure + module loader) |
+| `PoC/styles.css` | CSS variables, fonts, shadows, transitions |
+| `PoC/core.js` | Shared state, constants, calendar math, dispatcher, common render helpers |
+| `PoC/events.js` | Demo event data + `occursOn` / `describe` API |
+| `PoC/mode-days.js` | «Days/Map» view renderer |
+| `PoC/mode-hours.js` | «Hours/Timeline» view renderer |
+| `PoC/mode-months.js` | «Months» view renderer |
+| `PoC/navigation.js` | Zoom, mode transitions, cross-fade, go-now/center-date |
+| `PoC/controls.js` | HUD, date selector, legend, buttons, slider bindings |
+| `PoC/app.js` | Entry module: wires modules, input, render loop |
+
+### How to run
+Open `PoC/index.html` in a modern browser (ES6 modules must be loaded over `http/https`, so use any static server, e.g. `python -m http.server 8000`, and open `http://localhost:8000/PoC/index.html`).
 
 ### Target (Future — DO NOT CREATE YET)
 ```text

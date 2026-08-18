@@ -1,0 +1,9 @@
+[
+  {"id":"bkp","title":"DB Full Backup","plan":"night-backups","colorVar":"--event-bkp","type":"daily","start":1410,"dur":120},
+  {"id":"scan","title":"Vuln Scan","plan":"security","colorVar":"--event-scan","type":"week-row","week":2,"day":2,"start":180,"dur":90},
+  {"id":"logs","title":"Log Rotation","plan":"maintenance","colorVar":"--event-logs","type":"weekday-order","ord":1,"day":0,"start":270,"dur":45},
+  {"id":"redis","title":"Redis Flush","plan":"maintenance","colorVar":"--event-redis","type":"interval","n":3,"start":120,"dur":15},
+  {"id":"sync","title":"Config Sync","plan":"infra","colorVar":"--event-sync","type":"weekly","day":4,"start":1200,"dur":30},
+  {"id":"sunmon","title":"Sun→Mon Night","plan":"night-backups","colorVar":"--event-sunmon","type":"weekly","day":6,"start":1320,"dur":480},
+  {"id":"frisun","title":"Fri→Sun Long","plan":"maintenance","colorVar":"--event-frisun","type":"weekly","day":4,"start":960,"dur":2640}
+]

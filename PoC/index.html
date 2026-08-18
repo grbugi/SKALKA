@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SKALKA PoC</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <canvas id="cv"></canvas>
+  <button id="toggleHud" title="Скрыть/показать панель">☰</button>
+
+  <div id="debugOverlay">
+    <div class="row"><span class="label">FPS:</span><span class="val" id="dbgFps">0</span></div>
+    <div class="row"><span class="label">Viewport X:</span><span class="val" id="dbgVpX">0</span></div>
+    <div class="row"><span class="label">Viewport Y:</span><span class="val" id="dbgVpY">0</span></div>
+    <div class="row"><span class="label">Cells:</span><span class="val" id="dbgCells">0</span></div>
+    <div class="row"><span class="label">Events:</span><span class="val" id="dbgEvents">0</span></div>
+    <div class="row"><span class="label">Render:</span><span class="val" id="dbgRender">0ms</span></div>
+  </div>
+
+  <div id="hud">
+    <div class="brand">SKALKA <span>PoC</span></div>
+    <div class="sub">режимы: месяцы · дни · часы<br>переход — 3 скролла за порог масштаба</div>
+    <div class="fdow-bar">
+      <span>Первый день недели:</span>
+      <select id="fdowSelect">
+        <option value="mon" selected>пн</option>
+        <option value="sun">вс</option>
+      </select>
+    </div>
+    <div id="anchor"></div>
+    <div id="legend"></div>
+    <div class="help">
+      drag — панорама · колесо — масштаб<br>
+      ctrl+колесо — верт. панорама<br>
+      гориз. колесо / shift+колесо — гориз. панорама<br>
+      гуттер — верт. скролл · шапка — гориз. скролл<br>
+      dblclick / 0 — текущий момент<br>
+      за 1000% (3 скролла) → часы<br>
+      за 50% вниз (3 скролла) → месяцы<br>
+      −/+ — ступени · dblclick на −/+ — смена вида<br>
+      клик по % — сброс · слайдер — масштаб+вид
+    </div>
+  </div>
+
+  <div id="status"></div>
+
+  <div id="zoom-controls">
+    <div class="nav-row datebar" style="margin-bottom:0;">
+      <button id="date-nav-btn" title="Перейти к дате">▶</button>
+      <input type="number" id="nav-day" min="1" max="31" value="1" title="День">
+      <select id="nav-month" title="Месяц"></select>
+      <input type="number" id="nav-year" min="1900" max="2100" value="2024" title="Год">
+    </div>
+    <div id="zoom-bar">
+      <button id="gonow" title="текущий момент"><span style="color:var(--now-line)">●</span>&nbsp;сейчас</button>
+      <button id="zoom-out" title="уменьшить (dblclick — к месяцам)">−</button>
+      <span id="zoomPct" title="сбросить масштаб" style="font-variant-numeric:tabular-nums;">100%</span>
+      <button id="zoom-in" title="увеличить (dblclick — к часам)">+</button>
+    </div>
+    <div id="slider-wrap">
+      <input type="range" id="zoomSlider" min="0" max="300" step="1">
+      <div id="slider-labels">
+        <span>месяцы</span><span>дни</span><span>часы</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
